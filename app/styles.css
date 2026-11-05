@@ -1,0 +1,123 @@
+/* Seattle Transit Equity Index — global app styling (Task 3.4).
+ *
+ * Applied once from app/main.py via st.markdown("<style>…</style>",
+ * unsafe_allow_html=True). Best-effort, version-tolerant selectors:
+ * unknown rules are simply ignored by Streamlit's DOM.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Layout & spacing                                                    */
+/* ------------------------------------------------------------------ */
+
+.block-container {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+[data-testid="stVerticalBlock"] > div {
+  row-gap: 0.35rem;
+}
+
+/* Consistent section rhythm between tabs' blocks */
+[data-testid="stVerticalBlockBorderWrapper"] {
+  margin-bottom: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Title / header / caption refinement                                 */
+/* ------------------------------------------------------------------ */
+
+h1 {
+  letter-spacing: -0.015em;
+  font-weight: 650;
+  line-height: 1.15;
+  margin-bottom: 0.25rem;
+}
+
+h2,
+h3 {
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+[data-testid="stCaptionContainer"] p {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tabs + layer-control labels                                         */
+/* ------------------------------------------------------------------ */
+
+[data-baseweb="tab-list"] {
+  gap: 0.2rem;
+}
+
+[data-baseweb="tab"] {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Controls & buttons                                                  */
+/* ------------------------------------------------------------------ */
+
+.stDownloadButton button {
+  border-radius: 8px;
+  font-weight: 550;
+}
+
+/* Visible keyboard focus everywhere (accessibility) */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Embedded maps: full width, best-effort responsive height            */
+/* ------------------------------------------------------------------ */
+
+[data-testid="stComponent"] iframe,
+[data-testid="stIFrame"] iframe,
+.block-container iframe {
+  width: 100% !important;
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile graceful degradation (narrow widths)                         */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+  .block-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Stack multi-column panels instead of side-by-side */
+  [data-testid="stHorizontalBlock"] {
+    flex-wrap: wrap;
+  }
+
+  [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  /* Shrink embedded maps so they stay usable on phones */
+  [data-testid="stComponent"] iframe,
+  [data-testid="stIFrame"] iframe,
+  .block-container iframe {
+    height: 400px !important;
+  }
+
+  [data-testid="stMetricValue"] {
+    font-size: 1.25rem;
+  }
+}

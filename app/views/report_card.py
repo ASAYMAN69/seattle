@@ -164,8 +164,8 @@ def _stats_html(summary: dict[str, Any]) -> str:
         value = summary.get(col)
         text = fmt.format(value) if value is not None else "n/a"
         blocks.append(
-            '<div style="background:#f1f5f9;border-radius:8px;padding:8px 12px;'
-            "min-width:110px;flex:1;\">"
+            '<div style="background:#f8fafc;border:1px solid #e2e8f0;'
+            'border-radius:8px;padding:8px 12px;min-width:110px;flex:1;">'
             f'<div style="font-size:12px;color:#475569;">{label}</div>'
             f'<div style="font-size:17px;font-weight:700;color:#0f172a;">{text}</div>'
             "</div>"
@@ -186,7 +186,8 @@ def _grades_chips_html(grades: list[dict[str, Any]]) -> str:
             '<span style="background:'
             + color
             + ";color:#fff;font-weight:600;font-size:13px;"
-            "padding:3px 11px;border-radius:999px;\">"
+            "padding:3px 11px;border-radius:999px;box-shadow:0 1px 2px "
+            'rgba(15,23,42,0.25);">'
             f"{item['dimension']} {grade}</span>"
         )
     return (

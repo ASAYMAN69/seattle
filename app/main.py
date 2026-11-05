@@ -13,6 +13,7 @@ renders the neighborhood Equity Report Card
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import folium
@@ -20,11 +21,25 @@ import streamlit as st
 
 from datanova import __version__
 from app.data_io import PreparedDataError, load_prepared
+from app.views.export import render_export
 from app.views.map_view import ANALYSIS_LAYERS, GRADE_COLORS
 from app.views.report_card import render_report_card
 from app.views.whatif import render_whatif
 
 st.set_page_config(page_title="Seattle Transit Equity Index", layout="wide")
+
+
+def _inject_styles() -> None:
+    """Apply the global stylesheet (app/styles.css) via st.markdown."""
+    css_path = Path(__file__).resolve().parent / "styles.css"
+    try:
+        css = css_path.read_text(encoding="utf-8")
+    except OSError:
+        return
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+
+_inject_styles()
 
 st.title("Seattle Transit Equity Index")
 st.caption(
@@ -257,9 +272,10 @@ with st.sidebar:
     render_report_card(current, data)
 
 # Main area: tab 1 = map explorer (analysis layer + interactive map); tab 2
-# = what-if frequency explorer (Task 3.3).
-tab_explore, tab_whatif = st.tabs(
-    ["Map explorer", "What-if frequency explorer"]
+# = what-if frequency explorer (Task 3.3); tab 3 = export & summary
+# (Task 3.4).
+tab_explore, tab_whatif, tab_export = st.tabs(
+    ["Map explorer", "What-if frequency explorer", "Export & summary"]
 )
 
 with tab_explore:
@@ -280,3 +296,6 @@ with tab_explore:
 
 with tab_whatif:
     render_whatif(data)
+
+with tab_export:
+    render_export(data)

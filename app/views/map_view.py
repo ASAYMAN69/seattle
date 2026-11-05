@@ -22,12 +22,17 @@ GRADE_COLORS: dict[str, str] = {
 
 # Real choropleth layers over the block groups. "kind": "choropleth" uses a
 # numeric column binned by folium; "kind": "grade" colors by categorical grade.
+#
+# Color accessibility (colorblind-safe): need/access use *sequential*
+# single-hue palettes (YlOrBr, Blues); the gap layer uses a *diverging*
+# red-blue palette (RdBu) instead of a red-green one, so it stays readable to
+# red-green colorblind viewers. Legend text states the direction explicitly.
 ANALYSIS_LAYERS: list[dict[str, Any]] = [
     {
         "key": "need_index",
         "label": "Need Index",
         "column": "need_index",
-        "fill_color": "YlOrRd",
+        "fill_color": "YlOrBr",
         "legend": "Need index (higher = more need)",
         "kind": "choropleth",
     },
@@ -35,7 +40,7 @@ ANALYSIS_LAYERS: list[dict[str, Any]] = [
         "key": "access_overall",
         "label": "Access (overall)",
         "column": "access_overall",
-        "fill_color": "BuGn",
+        "fill_color": "Blues",
         "legend": "Overall access score (higher = better)",
         "kind": "choropleth",
     },
@@ -43,8 +48,8 @@ ANALYSIS_LAYERS: list[dict[str, Any]] = [
         "key": "gap",
         "label": "Equity Gap",
         "column": "gap",
-        "fill_color": "RdYlGn",
-        "legend": "Equity gap (access − need; positive = better)",
+        "fill_color": "RdBu",
+        "legend": "Equity gap (access − need): red = underserved, blue = better served",
         "kind": "choropleth",
     },
     {

@@ -354,6 +354,15 @@ def _preferred_route_key(prepared: dict[str, Any]) -> str | None:
     return corridors[0]["route_id"] if corridors else None
 
 
+def _action_callout_html(action: str) -> str:
+    """Styled callout for the recommendation's action text."""
+    return (
+        '<div style="border-left:4px solid #2563eb;background:#eff6ff;'
+        'border-radius:0 8px 8px 0;padding:8px 12px;margin:4px 0 8px;'
+        f'font-weight:600;color:#0f172a;">{action}</div>'
+    )
+
+
 def render_whatif(prepared: dict[str, Any]) -> None:
     """Render the What-if frequency explorer into the Streamlit UI.
 
@@ -403,7 +412,7 @@ def render_whatif(prepared: dict[str, Any]) -> None:
         st.warning("That corridor was not found in the sensitivity data.")
         return
 
-    st.markdown(f"**{proj['action']}**")
+    st.markdown(_action_callout_html(proj["action"]), unsafe_allow_html=True)
     st.caption(
         f"Reference scenario: {REFERENCE_MULTIPLIER:.1f}× frequency "
         f"(wait saving ≈ {proj['reference_wait_saving_min']:.2f} min). "
