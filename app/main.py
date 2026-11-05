@@ -22,6 +22,7 @@ from datanova import __version__
 from app.data_io import PreparedDataError, load_prepared
 from app.views.map_view import ANALYSIS_LAYERS, GRADE_COLORS
 from app.views.report_card import render_report_card
+from app.views.whatif import render_whatif
 
 st.set_page_config(page_title="Seattle Transit Equity Index", layout="wide")
 
@@ -255,18 +256,27 @@ with st.sidebar:
 
     render_report_card(current, data)
 
-# Main area: analysis layer selector + interactive map.
-labels = [cfg["label"] for cfg in ANALYSIS_LAYERS]
-layer_choice = st.session_state.get(LAYER_PARAM)
-if layer_choice not in labels:
-    layer_choice = labels[0]
-choice = st.selectbox(
-    "Analysis layer",
-    labels,
-    index=labels.index(layer_choice),
-    help="Color each block group by a real equity metric.",
+# Main area: tab 1 = map explorer (analysis layer + interactive map); tab 2
+# = what-if frequency explorer (Task 3.3).
+tab_explore, tab_whatif = st.tabs(
+    ["Map explorer", "What-if frequency explorer"]
 )
-st.session_state[LAYER_PARAM] = choice
 
-map_html = _build_interactive_map(data, choice)._repr_html_()
-st.components.v1.html(map_html, height=640, scrolling=False)
+with tab_explore:
+    labels = [cfg["label"] for cfg in ANALYSIS_LAYERS]
+    layer_choice = st.session_state.get(LAYER_PARAM)
+    if layer_choice not in labels:
+        layer_choice = labels[0]
+    choice = st.selectbox(
+        "Analysis layer",
+        labels,
+        index=labels.index(layer_choice),
+        help="Color each block group by a real equity metric.",
+    )
+    st.session_state[LAYER_PARAM] = choice
+
+    map_html = _build_interactive_map(data, choice)._repr_html_()
+    st.components.v1.html(map_html, height=640, scrolling=False)
+
+with tab_whatif:
+    render_whatif(data)
