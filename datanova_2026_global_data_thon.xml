@@ -1,0 +1,1472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hackathon name="DATANOVA 2026 GLOBAL DATA-THON" platform="Devpost">
+  
+  
+  <tagline>Not just a hackathon. A platform for meaningful innovation.</tagline>
+  
+  
+  <registration_action>Join hackathon</registration_action>
+  
+  
+  <eligibility>
+    
+    
+    <condition>Above legal age of majority in country of residence</condition>
+    
+    
+    <condition>Students only</condition>
+    
+    
+    <condition>Team required</condition>
+    
+    
+    <condition>Companies/professional organizations excluded from participation</condition>
+    
+    
+    <condition>All countries/territories, excluding standard exceptions</condition>
+    
+  
+  </eligibility>
+  
+  
+  <deadline>Nov 11, 2026 @ 4:00am GMT+6</deadline>
+  
+  
+  <time_remaining>5 more days to deadline</time_remaining>
+  
+  
+  <format>Online</format>
+  
+  
+  <visibility>Public</visibility>
+  
+  
+  <prize_pool>$1,750 in cash</prize_pool>
+  
+  
+  <participants>103</participants>
+  
+  
+  <organizer>DataNova</organizer>
+  
+  
+  <categories>
+    
+    
+    <category>E-commerce/Retail</category>
+    
+    
+    <category>Fintech</category>
+    
+    
+    <category>Health</category>
+    
+  
+  </categories>
+  
+  
+  <challenge>
+    
+    
+    <title>DataNova 2026 – Global Data-thon</title>
+    
+    
+    <slogan>Turning Data Into Decisions. Building Solutions That Matter.</slogan>
+    
+    
+    <description>DataNova 2026 – Global Data-thon is an international, virtual innovation challenge that brings together students, researchers, and working professionals to solve real-world problems through Data Science, Artificial Intelligence, Machine Learning, and data-driven innovation.
+
+Participants are invited to transform ideas into practical, impactful solutions that address challenges across industries and society. Whether you're building predictive models, developing intelligent applications, uncovering insights from complex datasets, or designing data-driven strategies, DataNova is an opportunity to demonstrate your technical expertise, creativity, and problem-solving abilities.</description>
+    
+    
+    <challenge_tracks>
+      
+      
+      <track>Artificial Intelligence and Machine Learning</track>
+      
+      
+      <track>Data Science and Advanced Analytics</track>
+      
+      
+      <track>Generative AI and Responsible AI</track>
+      
+      
+      <track>Data Engineering and Business Intelligence</track>
+      
+      
+      <track>Cybersecurity and Fraud Detection</track>
+      
+      
+      <track>Healthcare and Social Impact</track>
+      
+      
+      <track>Sustainability and Environmental Innovation</track>
+      
+      
+      <track>Operations Research and Decision Intelligence</track>
+      
+      
+      <track>Business Innovation and Open Innovation</track>
+      
+    
+    </challenge_tracks>
+    
+    
+    <what_we_are_looking_for>We encourage solutions that demonstrate a clear problem statement, sound technical methodology, originality, practical feasibility, responsible technology use, and measurable potential impact.
+
+Projects will be assessed against the competition's published judging criteria. Participants should clearly communicate their approach, implementation, validation, and the value their solution creates.
+
+DataNova 2026 is more than a competition—a platform to experiment, collaborate, and demonstrate how data can drive meaningful change.</what_we_are_looking_for>
+    
+    
+    <closing_statement>Bring your ideas. Build your solution. Turn data into decisions.</closing_statement>
+    
+  
+  </challenge>
+  
+  
+  <participation_and_submission_guide>
+    
+    
+    <step number="1">
+      
+      
+      <title>Register for the challenge</title>
+      
+      
+      <description>Complete your registration through the official competition listing on Devpost and review the eligibility requirements, rules, and deadlines.</description>
+      
+    
+    </step>
+    
+    
+    <step number="2">
+      
+      
+      <title>Choose a problem and track</title>
+      
+      
+      <description>Identify a real-world problem aligned with one of the challenge tracks. Define the problem clearly, identify your target users, and explain why your proposed solution matters.</description>
+      
+    
+    </step>
+    
+    
+    <step number="3">
+      
+      
+      <title>Build your solution</title>
+      
+      
+      <description>Develop your project using appropriate technologies, datasets, analytical methods, or AI/ML techniques. Focus on originality, technical quality, feasibility, and responsible use of data.</description>
+      
+    
+    </step>
+    
+    
+    <step number="4">
+      
+      
+      <title>Prepare your submission</title>
+      
+      
+      <description>Create a complete project submission that includes the project title and overview, problem statement, solution and methodology, demonstration, impact and validation, and team contributions.</description>
+      
+    
+    </step>
+    
+    
+    <step number="5">
+      
+      
+      <title>Submit before the deadline</title>
+      
+      
+      <description>Review the official Devpost challenge page for the final submission deadline, required deliverables, and applicable rules. Ensure all links and supporting materials work before submitting.</description>
+      
+    
+    </step>
+    
+    
+    <step number="6">
+      
+      
+      <title>Present your work</title>
+      
+      
+      <description>Shortlisted participants may be invited to present or demonstrate their projects during the evaluation or final round, subject to the official competition schedule.</description>
+      
+    
+    </step>
+    
+    
+    <submission_components>
+      
+      
+      <component>
+        
+        
+        <name>Project title and overview</name>
+        
+        
+        <description>Explain what your solution does.</description>
+        
+      
+      </component>
+      
+      
+      <component>
+        
+        
+        <name>Problem statement</name>
+        
+        
+        <description>Describe the challenge you are addressing.</description>
+        
+      
+      </component>
+      
+      
+      <component>
+        
+        
+        <name>Solution and methodology</name>
+        
+        
+        <description>Explain your approach, technologies, and implementation.</description>
+        
+      
+      </component>
+      
+      
+      <component>
+        
+        
+        <name>Demonstration</name>
+        
+        
+        <description>Include a working prototype, demo video, screenshots, or other supporting material, as applicable.</description>
+        
+      
+      </component>
+      
+      
+      <component>
+        
+        
+        <name>Impact and validation</name>
+        
+        
+        <description>Explain how the solution works, how you tested it, and its potential real-world value.</description>
+        
+      
+      </component>
+      
+      
+      <component>
+        
+        
+        <name>Team contributions</name>
+        
+        
+        <description>Clearly identify team members and their respective contributions.</description>
+        
+      
+      </component>
+      
+    
+    </submission_components>
+    
+  
+  </participation_and_submission_guide>
+  
+  
+  <tips_for_a_strong_submission>
+    
+    
+    <tip>Solve a clearly defined and meaningful problem.</tip>
+    
+    
+    <tip>Demonstrate your own work and explain your technical decisions.</tip>
+    
+    
+    <tip>Use reliable evidence to support your results and claims.</tip>
+    
+    
+    <tip>Follow data privacy, security, licensing, and responsible AI practices.</tip>
+    
+    
+    <tip>Make your project easy for judges to understand and evaluate.</tip>
+    
+  
+  </tips_for_a_strong_submission>
+  
+  
+  <closing_message>We look forward to seeing your ideas and the solutions you build.</closing_message>
+  
+  
+  <closing_slogan>Build. Innovate. Make an Impact.</closing_slogan>
+  
+  
+  <requirements>
+    
+    
+    <what_to_build>
+      
+      
+      <instruction>Visit website (https://datanovathon.com/). Explore tracks from the menu and select the track you want to create the project in. Open the problem statement and then create the working models as a solution.</instruction>
+      
+      
+      <website>https://datanovathon.com/</website>
+      
+    
+    </what_to_build>
+    
+    
+    <what_to_submit>
+      
+      
+      <deliverable>PPT</deliverable>
+      
+      
+      <deliverable>Working demo link</deliverable>
+      
+      
+      <deliverable>Optional video of project</deliverable>
+      
+    
+    </what_to_submit>
+    
+  
+  </requirements>
+  
+  
+  <hackathon_sponsors>
+    
+    
+    <sponsor>ACM Seattle Chapter</sponsor>
+    
+    
+    <sponsor>Swiss School of Management</sponsor>
+    
+  
+  </hackathon_sponsors>
+  
+  
+  <prizes total_value="$1,750">
+    
+    
+    <prize>
+      
+      
+      <place>First prize</place>
+      
+      
+      <cash_amount>$1,000 in cash</cash_amount>
+      
+      
+      <winners>1</winners>
+      
+      
+      <additional_details>Will be sum of cash and subscriptions</additional_details>
+      
+    
+    </prize>
+    
+    
+    <prize>
+      
+      
+      <place>Second Prize</place>
+      
+      
+      <cash_amount>$500 in cash</cash_amount>
+      
+      
+      <winners>1</winners>
+      
+      
+      <additional_details>Will be sum of cash and subscriptions</additional_details>
+      
+    
+    </prize>
+    
+    
+    <prize>
+      
+      
+      <place>Third Prize</place>
+      
+      
+      <cash_amount>$250 in cash</cash_amount>
+      
+      
+      <winners>1</winners>
+      
+      
+      <additional_details>Will be sum of cash and subscriptions</additional_details>
+      
+    
+    </prize>
+    
+  
+  </prizes>
+  
+  
+  <devpost_achievements>
+    
+    
+    <achievement>First online hackathon</achievement>
+    
+    
+    <achievement level="1">X Hackathons</achievement>
+    
+    
+    <achievement level="1">Hackathon Winner</achievement>
+    
+    
+    <achievement>Generalist</achievement>
+    
+  
+  </devpost_achievements>
+  
+  
+  <judges>
+    
+    
+    <judge>tanuvir</judge>
+    
+  
+  </judges>
+  
+  
+  <judging_criteria>
+    
+    
+    <criterion weight="20%">
+      
+      
+      <name>Innovation &amp; Originality</name>
+      
+      
+      <description>Novelty of the idea, creativity, and differentiation from existing solutions.</description>
+      
+    
+    </criterion>
+    
+    
+    <criterion weight="25%">
+      
+      
+      <name>Technical Implementation</name>
+      
+      
+      <description>Technical complexity, quality of execution, appropriate use of tools, and functionality.</description>
+      
+    
+    </criterion>
+    
+    
+    <criterion weight="15%">
+      
+      
+      <name>Problem Relevance</name>
+      
+      
+      <description>Clarity of the problem statement, importance, and alignment with the selected track.</description>
+      
+    
+    </criterion>
+    
+    
+    <criterion weight="15%">
+      
+      
+      <name>Data &amp; Analytical Rigor</name>
+      
+      
+      <description>Quality of data usage, analytical methodology, model validation, and reliability of results.</description>
+      
+    
+    </criterion>
+    
+    
+    <criterion weight="15%">
+      
+      
+      <name>Impact &amp; Feasibility</name>
+      
+      
+      <description>Practical applicability, scalability, and potential real-world or societal impact.</description>
+      
+    
+    </criterion>
+    
+    
+    <criterion weight="10%">
+      
+      
+      <name>Presentation &amp; Documentation</name>
+      
+      
+      <description>Clarity of explanation, demonstration quality, and completeness of supporting documentation.</description>
+      
+    
+    </criterion>
+    
+  
+  </judging_criteria>
+  
+  
+  <contact>Questions? Email the hackathon manager</contact>
+  
+  
+  <similar_hackathons>
+    
+    
+    <hackathon>
+      
+      
+      <title>Dakar Bitcoin Hack by BTrust</title>
+      
+      
+      <time_remaining>15 days left</time_remaining>
+      
+      
+      <dates>Oct 26 - Nov 20, 2026</dates>
+      
+      
+      <prizes>$900 in prizes</prizes>
+      
+      
+      <participants>167 participants</participants>
+      
+    
+    </hackathon>
+    
+    
+    <hackathon>
+      
+      
+      <title>2026-2027 Fall ESE Senior Design</title>
+      
+      
+      <time_remaining>about 1 month left</time_remaining>
+      
+      
+      <dates>Sep 22 - Dec 07, 2026</dates>
+      
+      
+      <prizes>1 non-cash prizes</prizes>
+      
+      
+      <participants>111 participants</participants>
+      
+    
+    </hackathon>
+    
+  
+  </similar_hackathons>
+  
+  
+  <official_website url="https://datanovathon.com/">
+    
+    
+    <hero>
+      
+      
+      <brand>DATANOVA GLOBAL DATA-THON 2026</brand>
+      
+      
+      <registration_status>REGISTRATIONS OPEN</registration_status>
+      
+      
+      <edition>THE GLOBAL EDITION / 2026</edition>
+      
+      
+      <headline>DATA. INTELLIGENCE. REAL-WORLD IMPACT.</headline>
+      
+      
+      <title>DATANOVA 2026 GLOBAL DATA-THON</title>
+      
+      
+      <tagline>Not just a hackathon. A platform for meaningful innovation.</tagline>
+      
+      
+      <description>An international virtual Data-thon bringing together innovators, data scientists, developers, researchers and problem-solvers to transform data into intelligent, scalable and impactful solutions.</description>
+      
+      
+      <action>Register as participant</action>
+      
+      
+      <action>Join as panel</action>
+      
+      
+      <action>View problem statements</action>
+      
+    
+    </hero>
+    
+    
+    <global_community>
+      
+      
+      <location_reference>47°36′ N · 122°19′ W</location_reference>
+      
+      
+      <motto>CONNECTED BY DATA — ONE WORLD. INFINITE POSSIBILITIES.</motto>
+      
+      
+      <theme>International</theme>
+      
+      
+      <theme>Virtual</theme>
+      
+      
+      <theme>Data Science</theme>
+      
+      
+      <theme>AI</theme>
+      
+      
+      <theme>Innovation</theme>
+      
+      
+      <theme>Real-World Problems</theme>
+      
+    
+    </global_community>
+    
+    
+    <event_dates>
+      
+      
+      <event_period>10 Oct – 30 Nov 2026</event_period>
+      
+      
+      <registration_opens>10 Oct 2026</registration_opens>
+      
+      
+      <final_submission>25 Nov 2026</final_submission>
+      
+      
+      <closing_ceremony>30 Nov 2026</closing_ceremony>
+      
+    
+    </event_dates>
+    
+    
+    <competition_overview>
+      
+      
+      <section_heading>Beyond the prototype.</section_heading>
+      
+      
+      <question>What is DataNova?</question>
+      
+      
+      <tagline>Not just a hackathon. A platform for meaningful innovation.</tagline>
+      
+      
+      <description>DataNova is a global data-driven innovation competition where participants use data, AI, machine learning, analytics and computational approaches to address meaningful real-world challenges.</description>
+      
+      
+      <audience>Built for a diverse community of students, researchers and professionals, it connects technical ambition with problems that matter.</audience>
+      
+      
+      <quote>DataNova is designed to move beyond prototypes and encourage solutions that demonstrate measurable value, technical depth, originality and real-world applicability.</quote>
+      
+      
+      <fields_of_innovation>
+        
+        
+        <field>Data Science</field>
+        
+        
+        <field>Artificial Intelligence</field>
+        
+        
+        <field>Machine Learning</field>
+        
+        
+        <field>Predictive Analytics</field>
+        
+        
+        <field>Generative AI</field>
+        
+        
+        <field>Data Engineering</field>
+        
+        
+        <field>Natural Language Processing</field>
+        
+        
+        <field>Computer Vision</field>
+        
+        
+        <field>Optimization</field>
+        
+        
+        <field>Decision Intelligence</field>
+        
+        
+        <field>Responsible AI</field>
+        
+        
+        <field>Social-impact Technology</field>
+        
+      
+      </fields_of_innovation>
+      
+    
+    </competition_overview>
+    
+    
+    <institutional_partners>
+      
+      
+      <section_heading>Academic. Professional. Global.</section_heading>
+      
+      
+      <description>DataNova brings together academic, professional and technology communities to create a multidisciplinary platform for data-driven innovation.</description>
+      
+      
+      <partner>
+        
+        
+        <name>ACM Seattle Chapter</name>
+        
+        
+        <description>The ACM Seattle Chapter has officially featured DataNova 2026 on its website, affirming the chapter’s support for the event.</description>
+        
+        
+        <link_label>View the official DataNova 2026 listing on ACM website</link_label>
+        
+        
+        <link_label>Explore the chapter</link_label>
+        
+      
+      </partner>
+      
+      
+      <partner>
+        
+        
+        <name>Swiss School of Management</name>
+        
+        
+        <located_in>University of Washington Rome Center</located_in>
+        
+        
+        <address>P.zza del Biscione, 95, 00186 Roma RM, Italy.</address>
+        
+      
+      </partner>
+      
+      
+      <additional_note>More institutional collaborations will be announced.</additional_note>
+      
+    
+    </institutional_partners>
+    
+    
+    <advisory_and_steering_committee>
+      
+      
+      <description>Academic perspective. Industry experience. A shared commitment to meaningful, rigorous innovation.</description>
+      
+      
+      <member>
+        
+        
+        <name>Dr. Satyasri Akula</name>
+        
+        
+        <role>Committee member</role>
+        
+        
+        <title>AI Architect | Agentic AI &amp; Intelligent Systems Leader | Digital Transformation Strategist</title>
+        
+        
+        <organization>PHD Swiss School of Management</organization>
+        
+        
+        <biography>Doctor of Philosophy - PhD, Impact of Adaptive Strategic Management on Organization Growth Powered by Digital Innovation</biography>
+        
+      
+      </member>
+      
+      
+      <member>
+        
+        
+        <name>Sravani Lingam</name>
+        
+        
+        <role>Chapter Chair</role>
+        
+        
+        <title>Chapter Chair ACM Seattle Chapter</title>
+        
+        
+        <organization>ACM Seattle Chapter</organization>
+        
+        
+        <biography>Biography and expertise to be announced.</biography>
+        
+      
+      </member>
+      
+      
+      <member>
+        
+        
+        <name>Abhilash Kalwa</name>
+        
+        
+        <role>Secretary</role>
+        
+        
+        <title>Secretary ACM Seattle Chapter</title>
+        
+        
+        <organization>ACM Seattle Chapter</organization>
+        
+        
+        <biography>Biography and expertise to be announced.</biography>
+        
+      
+      </member>
+      
+      
+      <member>
+        
+        
+        <name>Alekhya Challa</name>
+        
+        
+        <role>Membership Chair</role>
+        
+        
+        <title>Membership Chair ACM Seattle Chapter</title>
+        
+        
+        <organization>ACM Seattle Chapter</organization>
+        
+        
+        <biography>Biography and expertise to be announced.</biography>
+        
+      
+      </member>
+      
+    
+    </advisory_and_steering_committee>
+    
+    
+    <keynote_speakers>
+      
+      
+      <section_heading>Perspectives from the people shaping the future of data and intelligence.</section_heading>
+      
+      
+      <speaker>
+        
+        
+        <name>Riya Sunil Kumar Suri</name>
+        
+        
+        <title>Software Engineering MTS</title>
+        
+        
+        <organization>Salesforce</organization>
+        
+      
+      </speaker>
+      
+      
+      <speaker>
+        
+        
+        <name>Abhishek Chugh</name>
+        
+        
+        <title>Principal Software Development Engineer</title>
+        
+        
+        <organization>Zscaler</organization>
+        
+      
+      </speaker>
+      
+      
+      <speaker>
+        
+        
+        <name>Rajesh Gangula</name>
+        
+        
+        <title>AI Supply Chain Modernization Leader</title>
+        
+        
+        <organization>Swanktek</organization>
+        
+      
+      </speaker>
+      
+      
+      <speaker>
+        
+        
+        <name>Navdeep Singh</name>
+        
+        
+        <title>Product Leader</title>
+        
+        
+        <organization>Walmart Inc</organization>
+        
+      
+      </speaker>
+      
+      
+      <speaker>
+        
+        
+        <name>Archaana Pattabhii</name>
+        
+        
+        <title>SVP - Data Engineering controls</title>
+        
+        
+        <organization>Citigroup</organization>
+        
+      
+      </speaker>
+      
+      
+      <speaker>
+        
+        
+        <name>Sravan Kumar Nendrambaka</name>
+        
+        
+        <title>Architect</title>
+        
+      
+      </speaker>
+      
+      
+      <displayed_count>17+</displayed_count>
+      
+    
+    </keynote_speakers>
+    
+    
+    <jury>
+      
+      
+      <section_heading>Selection criteria</section_heading>
+      
+      
+      <description>The jury reviews shortlisted work with an independent view of technical quality, feasibility and real-world impact.</description>
+      
+      
+      <member>
+        
+        
+        <name>Somnath Banerjee</name>
+        
+        
+        <title>Architect MDM/CDP</title>
+        
+        
+        <organization>Exemplar Luxury Group</organization>
+        
+      
+      </member>
+      
+      
+      <member>
+        
+        
+        <name>Naveen Kumar Bonagiri</name>
+        
+        
+        <title>Engineering Project Manager</title>
+        
+        
+        <organization>Independent Researcher</organization>
+        
+      
+      </member>
+      
+      
+      <member>
+        
+        
+        <name>Rishabh N Dave</name>
+        
+        
+        <title>Head of Product</title>
+        
+        
+        <organization>BuildOps</organization>
+        
+      
+      </member>
+      
+      
+      <member>
+        
+        
+        <name>Gaurav Vashisht</name>
+        
+        
+        <title>Head of Finance, Legal and HR Systems</title>
+        
+        
+        <organization>Kraken</organization>
+        
+      
+      </member>
+      
+      
+      <judge_selection_criteria>Judge selection criteria</judge_selection_criteria>
+      
+      
+      <application_action>Apply as a judge</application_action>
+      
+    
+    </jury>
+    
+    
+    <session_chairs>
+      
+      
+      <description>Provides structured mentorship and expert evaluation to a designated group of finalists throughout the final-round process.</description>
+      
+      
+      <placeholder_profile>
+        
+        
+        <image_note>PHOTOGRAPH TO BE ADDED</image_note>
+        
+        
+        <name>[Full name]</name>
+        
+        
+        <title>[Designation]</title>
+        
+        
+        <organization>[Organization]</organization>
+        
+        
+        <country>[Country]</country>
+        
+      
+      </placeholder_profile>
+      
+      
+      <chair>
+        
+        
+        <name>Xiaochao Pu</name>
+        
+        
+        <title>Technology Strategy &amp; Transformation Consultant</title>
+        
+        
+        <organization>[Organization]</organization>
+        
+        
+        <location>Austin, TX, United States</location>
+        
+      
+      </chair>
+      
+      
+      <chair>
+        
+        
+        <name>Mogana Kumaran Sivaraman</name>
+        
+        
+        <title>Senior Staff Data Engineer</title>
+        
+        
+        <organization>Gap INC</organization>
+        
+      
+      </chair>
+      
+    
+    </session_chairs>
+    
+    
+    <judges>
+      
+      
+      <description>Four judges are shown at random on every visit. Search by name, title or organization to find anyone on the panel.</description>
+      
+      
+      <search_action>Search all judges</search_action>
+      
+      
+      <judge>
+        
+        
+        <name>Bhavana Devulapally</name>
+        
+        
+        <title>Cloud Engineer II</title>
+        
+        
+        <organization>Zebra Technologies</organization>
+        
+      
+      </judge>
+      
+      
+      <judge>
+        
+        
+        <name>Sidhartha Chennuri</name>
+        
+        
+        <title>SAP GRC ARCHITECT</title>
+        
+        
+        <organization>Mohawk Industries</organization>
+        
+      
+      </judge>
+      
+      
+      <judge>
+        
+        
+        <name>Fnu Tejinder</name>
+        
+        
+        <title>Senior Manager</title>
+        
+        
+        <organization>Independent Researcher</organization>
+        
+      
+      </judge>
+      
+      
+      <judge>
+        
+        
+        <name>Rakesh Kumar Pal</name>
+        
+        
+        <title>Sr. Solution Architect</title>
+        
+        
+        <organization>Amazon Web Services</organization>
+        
+      
+      </judge>
+      
+      
+      <application_action>Apply as a judge</application_action>
+      
+    
+    </judges>
+    
+    
+    <problem_statements>
+      
+      
+      <section_heading>Your next challenge starts here.</section_heading>
+      
+      
+      <tagline>Real problems. Remarkable possibilities.</tagline>
+      
+      
+      <description>Explore the problem statements. Find a challenge that matches your skills—and build a solution that makes a difference.</description>
+      
+      
+      <filters>
+        
+        
+        <filter>All</filter>
+        
+        
+        <filter>AI</filter>
+        
+        
+        <filter>Data Science</filter>
+        
+        
+        <filter>Healthcare</filter>
+        
+        
+        <filter>Finance</filter>
+        
+        
+        <filter>Education</filter>
+        
+        
+        <filter>Cybersecurity</filter>
+        
+        
+        <filter>Sustainability</filter>
+        
+        
+        <filter>Social Impact</filter>
+        
+        
+        <filter>Business</filter>
+        
+        
+        <filter>Operations Research</filter>
+        
+        
+        <filter>Other</filter>
+        
+      
+      </filters>
+      
+      
+      <problem>
+        
+        
+        <title>Multilingual Intelligent Document Understanding</title>
+        
+        
+        <description>Build an AI system that extracts, classifies and structures information from multilingual business documents (invoices, contracts, forms) with varying layouts and quality.</description>
+        
+        
+        <difficulty>Advanced</difficulty>
+        
+        
+        <suggested_technologies>Python, NLP, OCR, Transformers, LangChain</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Customer Churn Prediction and Retention Strategy</title>
+        
+        
+        <description>Predict customer churn and recommend targeted retention actions based on behavior and engagement data.</description>
+        
+        
+        <difficulty>Intermediate</difficulty>
+        
+        
+        <suggested_technologies>Python, scikit-learn, SQL, BI tools</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Network Intrusion Detection with Imbalanced Threat Data</title>
+        
+        
+        <description>Develop a network intrusion detection model that handles highly imbalanced threat data and adapts to evolving attack patterns.</description>
+        
+        
+        <difficulty>Advanced</difficulty>
+        
+        
+        <suggested_technologies>Python, deep learning, SMOTE, ensemble methods</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Urban Mobility Pattern Analysis from Transit Data</title>
+        
+        
+        <description>Analyze public transit data to uncover mobility patterns, identify underserved routes and propose data-driven service improvements.</description>
+        
+        
+        <difficulty>Intermediate</difficulty>
+        
+        
+        <suggested_technologies>Python, Pandas, GeoPandas, Tableau / Power BI</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Adaptive Learning Path Recommendation</title>
+        
+        
+        <description>Design a recommendation engine that personalizes learning paths for students based on performance, behavior and goals.</description>
+        
+        
+        <difficulty>Intermediate</difficulty>
+        
+        
+        <suggested_technologies>Python, collaborative filtering, graph algorithms</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Real-Time Payment Fraud Detection</title>
+        
+        
+        <description>Build a real-time anomaly detection system that flags fraudulent payment transactions with low false-positive rates.</description>
+        
+        
+        <difficulty>Advanced</difficulty>
+        
+        
+        <suggested_technologies>Python, streaming frameworks, isolation forest, gradient boosting</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Early Risk Stratification for Chronic Disease</title>
+        
+        
+        <description>Develop a predictive model that stratifies patients by risk of developing a chronic condition using electronic health records.</description>
+        
+        
+        <difficulty>Advanced</difficulty>
+        
+        
+        <suggested_technologies>Python, scikit-learn, XGBoost, SHAP</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Open Innovation Challenge</title>
+        
+        
+        <description>Bring your own real-world problem and demonstrate a data-driven solution with measurable impact.</description>
+        
+        
+        <difficulty>Open</difficulty>
+        
+        
+        <suggested_technologies>Open — choose the stack that fits your problem.</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Last-Mile Delivery Route Optimization</title>
+        
+        
+        <description>Optimize last-mile delivery routes under capacity, time-window and traffic constraints to reduce cost and improve service.</description>
+        
+        
+        <difficulty>Advanced</difficulty>
+        
+        
+        <suggested_technologies>Python, OR-Tools, vehicle routing, geospatial</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Food Bank Resource Allocation Optimization</title>
+        
+        
+        <description>Optimize the allocation of food donations across distribution centers to minimize waste and meet community need.</description>
+        
+        
+        <difficulty>Intermediate</difficulty>
+        
+        
+        <suggested_technologies>Python, linear programming, PuLP / OR-Tools</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+      
+      <problem>
+        
+        
+        <title>Solar Energy Generation Forecasting</title>
+        
+        
+        <description>Forecast solar energy generation from weather and plant data to support grid stability and renewable planning.</description>
+        
+        
+        <difficulty>Intermediate</difficulty>
+        
+        
+        <suggested_technologies>Python, time-series forecasting, regression</suggested_technologies>
+        
+        
+        <details_action>View full problem</details_action>
+        
+      
+      </problem>
+      
+    
+    </problem_statements>
+    
+  
+  </official_website>
+  
+
+</hackathon>
