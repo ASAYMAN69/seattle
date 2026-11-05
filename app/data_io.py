@@ -24,6 +24,7 @@ EQUITY_SCORES_PATH = PREPARED_DIR / "equity" / "equity_scores.geojson"
 REPORT_CARDS_PATH = PREPARED_DIR / "equity" / "report_cards.json"
 RECOMMENDATIONS_PATH = PREPARED_DIR / "equity" / "recommendations.geojson"
 SENSITIVITY_PATH = PREPARED_DIR / "equity" / "sensitivity.parquet"
+ACS_DEMOGRAPHICS_PATH = PREPARED_DIR / "census" / "acs_demographics.parquet"
 
 # Minimum required columns for each file (extra columns are allowed).
 _BOUNDARY_MIN_COLS: tuple[str, ...] = ("geometry",)
@@ -52,6 +53,19 @@ _SENSITIVITY_MIN_COLS: tuple[str, ...] = (
     "affected_pop",
     "est_access_gain_mean",
     "est_access_gain_popweighted",
+)
+_ACS_MIN_COLS: tuple[str, ...] = (
+    "geoid",
+    "poverty_pct",
+    "zero_car_pct",
+    "median_income",
+)
+# ACS demographic fields joined into equity_scores when they are missing there
+# (pop_total already exists on equity_scores, so it is not re-joined).
+ACS_JOIN_COLS: tuple[str, ...] = (
+    "poverty_pct",
+    "zero_car_pct",
+    "median_income",
 )
 _REPORT_CARDS_REQUIRED_KEYS: tuple[str, ...] = ("generated_at", "summary", "report_cards")
 
@@ -113,6 +127,40 @@ def _read_sensitivity(path: Path) -> pd.DataFrame:
     return df
 
 
+def _read_acs(path: Path) -> pd.DataFrame:
+    """Load the ACS demographics parquet and validate required columns."""
+    if not path.exists():
+        raise PreparedDataError(f"ACS demographics missing: {path}")
+    try:
+        df = pd.read_parquet(path)
+    except Exception as exc:  # noqa: BLE001
+        raise PreparedDataError(f"ACS demographics could not be read ({path}): {exc}") from exc
+    missing = [col for col in _ACS_MIN_COLS if col not in df.columns]
+    if missing:
+        raise PreparedDataError(
+            f"ACS demographics missing required column(s): {', '.join(missing)} ({path})"
+        )
+    return df
+
+
+def _join_acs(equity_scores: gpd.GeoDataFrame) -> None:
+    """Join ACS demographic columns into ``equity_scores`` in place.
+
+    ``pop_total`` already exists on equity_scores, so only the missing ACS
+    fields (poverty_pct, zero_car_pct, median_income) are joined from the ACS
+    demographics parquet.
+    """
+    missing = [col for col in ACS_JOIN_COLS if col not in equity_scores.columns]
+    if not missing:
+        return
+    acs = _read_acs(ACS_DEMOGRAPHICS_PATH)
+    key = equity_scores["geoid"].astype(str)
+    acs_key = acs["geoid"].astype(str)
+    acs_indexed = acs.set_index(acs_key)
+    for col in missing:
+        equity_scores[col] = acs_indexed[col].reindex(key).to_numpy()
+
+
 def load_prepared() -> dict[str, Any]:
     """Load every prepared input into typed structures.
 
@@ -135,6 +183,7 @@ def load_prepared() -> dict[str, Any]:
     equity_scores = _read_geojson(
         EQUITY_SCORES_PATH, _EQUITY_MIN_COLS, "Equity scores"
     )
+    _join_acs(equity_scores)
     recommendations = _read_geojson(
         RECOMMENDATIONS_PATH, _RECOMMENDATIONS_MIN_COLS, "Recommendations"
     )
