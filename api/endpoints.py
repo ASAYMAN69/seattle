@@ -14,10 +14,16 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
+import geopandas as gpd
 from fastapi import APIRouter, HTTPException, Query
 
+from typing import Literal
+
+from api import scenarios as scen
 from api import serialization as ser
 from api.data import PREPARED
+
+TimeOfDay = Literal["am_peak", "off_peak"]
 
 router = APIRouter(prefix="/api")
 
@@ -49,14 +55,20 @@ SNAPSHOT_COLUMNS: tuple[str, ...] = (
 GRADE_RANK: dict[str, int] = {"A": 0, "B": 1, "C": 2, "D": 3, "F": 4}
 
 
-def build_top_underserved(prepared: dict[str, Any], n: int) -> pd.DataFrame:
+def build_top_underserved(
+    prepared: dict[str, Any], n: int, time_of_day: str = "am_peak"
+) -> pd.DataFrame:
     """Top ``n`` underserved block groups (plain DataFrame, no geometry).
 
     Ranked by ``need_index`` descending, then ``gap`` ascending, then letter
     grade F-first — identical semantics to ``app.views.export.build_top_underserved_table``.
+    For ``off_peak`` the adjusted equity frame is used and an
+    ``approximation_note`` column is added.
     """
-    equity = prepared["equity_scores"]
+    equity = scen.adjusted_equity_frame(prepared, time_of_day)
     df = equity[list(SNAPSHOT_COLUMNS)].copy()
+    if scen.is_off_peak(time_of_day):
+        df["approximation_note"] = scen.OFF_PEAK_NOTE
     df["_grade_rank"] = df["grade"].map(GRADE_RANK).fillna(len(GRADE_RANK))
     ranked = df.sort_values(
         ["need_index", "gap", "_grade_rank"],
@@ -93,9 +105,24 @@ def boundary() -> dict[str, Any]:
 
 
 @router.get("/equity")
-def equity() -> dict[str, Any]:
+def equity(
+    time_of_day: TimeOfDay = Query("am_peak", description="am_peak (default) or off_peak"),
+) -> dict[str, Any]:
     """Equity scores (with ACS demographics joined) as GeoJSON."""
-    return ser.gdf_to_featurecollection(PREPARED["equity_scores"])
+    try:
+        scen.validate_time_of_day(time_of_day)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    if scen.is_off_peak(time_of_day):
+        df = scen.adjusted_equity_frame(PREPARED, time_of_day)
+        gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=PREPARED["equity_scores"].crs)
+        gdf["time_of_day"] = time_of_day
+        gdf["scenario_id"] = time_of_day
+        gdf["approximation_applied"] = True
+        gdf["methodology_note"] = scen.equity_methodology_note(time_of_day)
+        return ser.gdf_to_featurecollection(gdf)
+    fc = ser.gdf_to_featurecollection(PREPARED["equity_scores"])
+    return fc
 
 
 @router.get("/recommendations")
@@ -121,26 +148,45 @@ def top_underserved(
     n: int = Query(
         25, ge=1, le=5000, description="Number of block groups to return."
     ),
+    time_of_day: TimeOfDay = Query("am_peak", description="am_peak (default) or off_peak"),
 ) -> list[dict[str, Any]]:
     """Top-N underserved block groups (plain records, no geometry)."""
-    return ser.frame_to_records(build_top_underserved(PREPARED, n))
+    try:
+        scen.validate_time_of_day(time_of_day)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    return ser.frame_to_records(build_top_underserved(PREPARED, n, time_of_day))
 
 
 @router.get("/block-group/{geoid}")
-def block_group(geoid: str) -> dict[str, Any]:
+def block_group(
+    geoid: str,
+    time_of_day: TimeOfDay = Query("am_peak", description="am_peak (default) or off_peak"),
+) -> dict[str, Any]:
     """One block group's full equity row (with ACS stats) as a GeoJSON feature."""
-    row = lookup_block_group(geoid, PREPARED)
-    if row is None:
+    try:
+        scen.validate_time_of_day(time_of_day)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    equity = scen.adjusted_equity_frame(PREPARED, time_of_day)
+    key = str(geoid).strip()
+    matches = equity.loc[equity["geoid"].astype(str) == key]
+    if matches.empty:
         raise HTTPException(
             status_code=404,
             detail=f"Block group {geoid!r} not found in equity data.",
         )
-    equity = PREPARED["equity_scores"]
+    row = matches.iloc[0]
     props = {
         col: ser.clean_value(row[col])
         for col in equity.columns
         if col != "geometry"
     }
+    if scen.is_off_peak(time_of_day):
+        props["time_of_day"] = time_of_day
+        props["scenario_id"] = time_of_day
+        props["approximation_applied"] = True
+        props["methodology_note"] = scen.equity_methodology_note(time_of_day)
     return {
         "type": "Feature",
         "geometry": ser.geometry_to_geojson(row.geometry),
@@ -166,4 +212,11 @@ def metadata() -> dict[str, Any]:
             "prepared DataNova 2026 transit-equity analysis. The equity gap = "
             "access − need (positive = better served). No live routing or API keys."
         ),
+        "scenarios": {s["id"]: s for s in scen.SCENARIOS},
     }
+
+
+@router.get("/scenarios")
+def scenarios() -> list[dict[str, Any]]:
+    """Both scenario descriptors (id, label, is_full_compute, basis, notes)."""
+    return list(scen.SCENARIOS)
