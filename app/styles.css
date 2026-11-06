@@ -1,8 +1,17 @@
-/* Seattle Transit Equity Index — global app styling (Task 3.4).
+/* Seattle Transit Equity Index — global app styling (Task 4.0 refactor).
  *
- * Applied once from app/main.py via st.markdown("<style>…</style>",
- * unsafe_allow_html=True). Best-effort, version-tolerant selectors:
- * unknown rules are simply ignored by Streamlit's DOM.
+ * Single styling mechanism: this file is injected exactly once from
+ * app/main.py, wrapped in a style tag via st.markdown(..., unsafe_allow_html=True)
+ * — the canonical safe CSS path. The stylesheet renders as a style element,
+ * never as visible text (the historical bug).
+ *
+ * NOTE: keep the literal sequence "less-than slash style greater-than" out of
+ * this file's text, including comments — it would prematurely close the
+ * injected style element and leak the remainder as visible text.
+ *
+ * Component classes below (dn- prefix) style the small HTML fragments built in
+ * app/views/_ui.py. Folium maps are iframed documents, so map-internal chrome
+ * (the grade legend) uses the scoped snippet in _ui.MAP_LEGEND_CSS instead.
  */
 
 /* ------------------------------------------------------------------ */
@@ -66,12 +75,91 @@ h3 {
 .stDownloadButton button {
   border-radius: 8px;
   font-weight: 550;
+  transition: transform 120ms ease-out;
+}
+
+.stDownloadButton button:active {
+  transform: scale(0.98);
 }
 
 /* Visible keyboard focus everywhere (accessibility) */
 :focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* App-built HTML components (see app/views/_ui.py)                    */
+/* ------------------------------------------------------------------ */
+
+/* Report-card ACS stat tiles */
+.dn-stat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.dn-stat {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 110px;
+  flex: 1 1 auto;
+}
+
+.dn-stat-label {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.dn-stat-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+/* Grade pills: grade color arrives as --dn-grade-bg (data-driven). Solid
+ * white-on-grade by default; where color-mix is supported, tint the pill and
+ * darken the text so every grade clears WCAG AA contrast on the chip. */
+.dn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 12px;
+}
+
+.dn-chip {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--dn-grade-bg, #6b7280);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+}
+
+@supports (background: color-mix(in srgb, red 50%, white)) {
+  .dn-chip {
+    background: color-mix(in srgb, var(--dn-grade-bg, #6b7280) 22%, #ffffff);
+    color: color-mix(in srgb, var(--dn-grade-bg, #6b7280) 72%, #0f172a);
+  }
+}
+
+/* Recommendation action callout */
+.dn-callout {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 4px 0 8px;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 /* ------------------------------------------------------------------ */
@@ -83,6 +171,20 @@ h3 {
 .block-container iframe {
   width: 100% !important;
   border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion (accessibility)                                      */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ------------------------------------------------------------------ */

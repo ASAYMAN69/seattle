@@ -18,6 +18,7 @@ from typing import Any
 
 import pandas as pd
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 
 from app.views.report_card import lookup_block_group
 
@@ -79,7 +80,7 @@ def _current_selection() -> str | None:
     """
     try:
         selected = st.session_state.get("selected_geoid")
-    except Exception:  # noqa: BLE001 - bare import / no runtime
+    except (AttributeError, StreamlitAPIException):  # bare import / no runtime
         return None
     return _as_str_geoid(selected) if selected else None
 

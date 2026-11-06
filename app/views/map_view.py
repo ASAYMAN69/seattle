@@ -8,17 +8,17 @@ import geopandas as gpd
 import streamlit as st
 
 from app.data_io import BOUNDARY_PATH, PREPARED_DIR
+from app.views._ui import (
+    GRADE_COLORS as GRADE_COLORS,
+    MAP_LEGEND_CSS,
+    folium_inject_css,
+    grade_legend_html,
+)
 
 __all__ = ["PREPARED_DIR", "BOUNDARY_PATH", "load_boundary", "render_map"]
 
-# A–F grade colors (used by the categorical Grade layer).
-GRADE_COLORS: dict[str, str] = {
-    "A": "#1a7f37",
-    "B": "#2d9d4f",
-    "C": "#e3b341",
-    "D": "#e0762a",
-    "F": "#c62828",
-}
+# A–F grade colors (used by the categorical Grade layer). Canonical dict lives
+# in app/views/_ui.py; re-exported here for existing callers.
 
 # Real choropleth layers over the block groups. "kind": "choropleth" uses a
 # numeric column binned by folium; "kind": "grade" colors by categorical grade.
@@ -87,22 +87,6 @@ def _grade_style(properties: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _grade_legend_html() -> str:
-    rows = "".join(
-        '<div style="display:flex;align-items:center;margin-bottom:2px;">'
-        '<span style="display:inline-block;width:14px;height:14px;'
-        f'background:{color};margin-right:6px;border:1px solid #555;"></span>'
-        f"{grade}</div>"
-        for grade, color in GRADE_COLORS.items()
-    )
-    return (
-        '<div style="position:absolute;bottom:24px;right:24px;z-index:1000;'
-        'background:#fff;padding:8px 10px;border-radius:4px;box-shadow:0 1px 4px '
-        'rgba(0,0,0,.3);font:12px/1.4 sans-serif;">'
-        "<strong>Grade</strong><br/>" + rows + "</div>"
-    )
-
-
 def _build_map(boundary: gpd.GeoDataFrame) -> folium.Map:
     bounds = boundary.total_bounds  # (minx, miny, maxx, maxy)
     center = [(bounds[1] + bounds[3]) / 2, (bounds[0] + bounds[2]) / 2]
@@ -130,7 +114,8 @@ def _add_analysis_layer(
             name=layer["label"],
             style_function=lambda feature: _grade_style(feature["properties"]),
         ).add_to(m)
-        m.get_root().html.add_child(folium.Element(_grade_legend_html()))
+        folium_inject_css(m, MAP_LEGEND_CSS)
+        m.get_root().html.add_child(folium.Element(grade_legend_html()))
         return
 
     folium.Choropleth(
@@ -174,5 +159,9 @@ def render_map(data: dict[str, Any]) -> None:
 
     folium.LayerControl(collapsed=True).add_to(m)
 
-    # Streamlit-friendly embedding
-    st.components.v1.html(m._repr_html_(), height=640, scrolling=False)
+    # Modern iframe embedding (st.iframe replaced the deprecated components API).
+    st.iframe(
+        m._repr_html_(),
+        height=640,
+        alt="Map of the selected Seattle transit equity layer",
+    )

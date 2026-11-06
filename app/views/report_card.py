@@ -11,6 +11,14 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+from app.views._ui import (
+    ACS_STAT_FIELDS,
+    GRADE_COLORS,
+    UNKNOWN_GRADE_COLOR,
+    grades_chips_html,
+    stats_html,
+)
+
 __all__ = [
     "ACS_STAT_FIELDS",
     "GRADE_DIMENSIONS",
@@ -32,22 +40,8 @@ GRADE_DIMENSIONS: tuple[tuple[str, str], ...] = (
     ("Overall", "grade"),
 )
 
-GRADE_COLORS: dict[str, str] = {
-    "A": "#1a7f37",
-    "B": "#2d9d4f",
-    "C": "#e3b341",
-    "D": "#e0762a",
-    "F": "#c62828",
-}
-UNKNOWN_GRADE_COLOR = "#6b7280"
-
-# (label, field on equity_scores, str.format spec for display)
-ACS_STAT_FIELDS: tuple[tuple[str, str, str], ...] = (
-    ("Population", "pop_total", "{:,}"),
-    ("Poverty rate", "poverty_pct", "{:.1%}"),
-    ("Zero-car households", "zero_car_pct", "{:.1%}"),
-    ("Median income", "median_income", "${:,.0f}"),
-)
+# GRADE_COLORS / UNKNOWN_GRADE_COLOR / ACS_STAT_FIELDS live in
+# app/views/_ui.py (single source of truth) and are re-exported above.
 
 
 def _as_str_geoid(geoid: Any) -> str:
@@ -158,45 +152,6 @@ def get_top_recommendations(
     return result
 
 
-def _stats_html(summary: dict[str, Any]) -> str:
-    blocks: list[str] = []
-    for label, col, fmt in ACS_STAT_FIELDS:
-        value = summary.get(col)
-        text = fmt.format(value) if value is not None else "n/a"
-        blocks.append(
-            '<div style="background:#f8fafc;border:1px solid #e2e8f0;'
-            'border-radius:8px;padding:8px 12px;min-width:110px;flex:1;">'
-            f'<div style="font-size:12px;color:#475569;">{label}</div>'
-            f'<div style="font-size:17px;font-weight:700;color:#0f172a;">{text}</div>'
-            "</div>"
-        )
-    return (
-        '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px;">'
-        + "".join(blocks)
-        + "</div>"
-    )
-
-
-def _grades_chips_html(grades: list[dict[str, Any]]) -> str:
-    chips: list[str] = []
-    for item in grades:
-        grade = item["grade"] or "—"
-        color = GRADE_COLORS.get(grade, UNKNOWN_GRADE_COLOR)
-        chips.append(
-            '<span style="background:'
-            + color
-            + ";color:#fff;font-weight:600;font-size:13px;"
-            "padding:3px 11px;border-radius:999px;box-shadow:0 1px 2px "
-            'rgba(15,23,42,0.25);">'
-            f"{item['dimension']} {grade}</span>"
-        )
-    return (
-        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px;">'
-        + "".join(chips)
-        + "</div>"
-    )
-
-
 def render_report_card(geoid: Any, data: dict[str, Any]) -> None:
     """Render the Equity Report Card for ``geoid`` into the Streamlit UI.
 
@@ -222,12 +177,12 @@ def render_report_card(geoid: Any, data: dict[str, Any]) -> None:
         if summary.get("block_group"):
             identity += f" / BG {summary['block_group']}"
     st.markdown(f"#### {identity}")
-    st.markdown(_stats_html(summary), unsafe_allow_html=True)
+    st.markdown(stats_html(summary), unsafe_allow_html=True)
 
     grades = get_grades(geoid, data)
     if grades:
         st.markdown("**Grades**")
-        st.markdown(_grades_chips_html(grades), unsafe_allow_html=True)
+        st.markdown(grades_chips_html(grades), unsafe_allow_html=True)
 
     st.markdown("**Top recommendations**")
     recommendations = get_top_recommendations(geoid, data)
@@ -238,6 +193,6 @@ def render_report_card(geoid: Any, data: dict[str, Any]) -> None:
             affected = rec["affected_pop"]
             pop_txt = f"{affected:,}" if affected is not None else "n/a"
             st.markdown(
-                f"- **{rec['corridor']}** — {rec['action']} "
+                f"- **{rec['corridor']}**: {rec['action']} "
                 f"(≈ {pop_txt} residents affected)"
             )

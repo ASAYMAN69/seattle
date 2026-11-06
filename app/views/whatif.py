@@ -44,6 +44,9 @@ import folium
 import geopandas as gpd
 import pandas as pd
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
+
+from app.views._ui import action_callout_html
 
 __all__ = [
     "FREQ_MIN",
@@ -344,7 +347,7 @@ def _preferred_route_key(prepared: dict[str, Any]) -> str | None:
     """
     try:
         selected = st.session_state.get("selected_geoid")
-    except Exception:  # noqa: BLE001 - bare import / no runtime
+    except (AttributeError, StreamlitAPIException):  # bare import / no runtime
         selected = None
     if selected:
         serving = route_ids_serving_geoid(str(selected), prepared)
@@ -352,15 +355,6 @@ def _preferred_route_key(prepared: dict[str, Any]) -> str | None:
             return serving[0]
     corridors = sensitivity_corridors(prepared)
     return corridors[0]["route_id"] if corridors else None
-
-
-def _action_callout_html(action: str) -> str:
-    """Styled callout for the recommendation's action text."""
-    return (
-        '<div style="border-left:4px solid #2563eb;background:#eff6ff;'
-        'border-radius:0 8px 8px 0;padding:8px 12px;margin:4px 0 8px;'
-        f'font-weight:600;color:#0f172a;">{action}</div>'
-    )
 
 
 def render_whatif(prepared: dict[str, Any]) -> None:
@@ -383,7 +377,7 @@ def render_whatif(prepared: dict[str, Any]) -> None:
     def _fmt(opt: tuple[str | None, str, int | None]) -> str:
         corridor, affected = opt[1], opt[2]
         pop = f"{affected:,}" if affected is not None else "n/a"
-        return f"{corridor} — ~{pop} residents"
+        return f"{corridor} · ~{pop} residents"
 
     choice = st.selectbox(
         "Recommended corridor",
@@ -412,7 +406,7 @@ def render_whatif(prepared: dict[str, Any]) -> None:
         st.warning("That corridor was not found in the sensitivity data.")
         return
 
-    st.markdown(_action_callout_html(proj["action"]), unsafe_allow_html=True)
+    st.markdown(action_callout_html(proj["action"]), unsafe_allow_html=True)
     st.caption(
         f"Reference scenario: {REFERENCE_MULTIPLIER:.1f}× frequency "
         f"(wait saving ≈ {proj['reference_wait_saving_min']:.2f} min). "
@@ -431,4 +425,8 @@ def render_whatif(prepared: dict[str, Any]) -> None:
     )
 
     map_html = build_highlight_map(prepared, route_id)._repr_html_()
-    st.iframe(map_html, height=480)
+    st.iframe(
+        map_html,
+        height=480,
+        alt="Map highlighting the recommended corridor and served block groups",
+    )

@@ -19,6 +19,7 @@ from typing import Any
 
 import folium
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 
 # Ensure the repo root is importable regardless of how Streamlit launches this
 # script (streamlit run app/main.py does not put the project root on sys.path).
@@ -26,6 +27,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from datanova import __version__  # noqa: E402
 from app.data_io import PreparedDataError, load_prepared  # noqa: E402
+from app.views._ui import (  # noqa: E402
+    MAP_LEGEND_CSS,
+    folium_inject_css,
+    grade_legend_html,
+)
 from app.views.export import render_export  # noqa: E402
 from app.views.map_view import ANALYSIS_LAYERS, GRADE_COLORS  # noqa: E402
 from app.views.report_card import render_report_card  # noqa: E402
@@ -33,14 +39,17 @@ from app.views.whatif import render_whatif  # noqa: E402
 
 st.set_page_config(page_title="Seattle Transit Equity Index", layout="wide")
 
+# The single global stylesheet (see app/styles.css). Injected from
+# ``_inject_styles`` via ``st.markdown(..., unsafe_allow_html=True)`` — the
+# canonical safe CSS path: the stylesheet is wrapped in a ``<style>`` tag and
+# rendered as a style element, never as visible text (the historical bug).
+STYLESHEET = Path(__file__).resolve().parent / "styles.css"
+
 
 def _inject_styles() -> None:
-    """Global styling is handled by `.streamlit/config.toml` ([theme]), which
-    is native and cannot leak source text into the page. Custom CSS injection
-    via st.markdown/st.html was removed (2026-11-06) after users reported the
-    stylesheet source rendering as visible text; do not reintroduce a
-    `<style>` block through an HTML-String path."""
-    return
+    """Inject the single app stylesheet into the rendered page."""
+    css = STYLESHEET.read_text(encoding="utf-8")
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
 _inject_styles()
@@ -63,14 +72,14 @@ def _read_query_selection() -> None:
     """Move a map-click selection (URL query params) into session state."""
     try:
         qp = st.query_params
-    except Exception:  # noqa: BLE001 - bare import / no runtime
+    except (AttributeError, StreamlitAPIException):  # bare import / no runtime
         return
     clicked = qp.get(SELECT_PARAM)
     if clicked:
         st.session_state[SELECT_PARAM] = str(clicked)
         try:
             del qp[SELECT_PARAM]
-        except Exception:  # noqa: BLE001
+        except (AttributeError, StreamlitAPIException):
             pass
     layer = qp.get(LAYER_PARAM)
     if layer:
@@ -79,7 +88,7 @@ def _read_query_selection() -> None:
             st.session_state[LAYER_PARAM] = layer
         try:
             del qp[LAYER_PARAM]
-        except Exception:  # noqa: BLE001
+        except (AttributeError, StreamlitAPIException):
             pass
 
 
@@ -106,22 +115,6 @@ def _grade_style(feature: dict[str, Any]) -> dict[str, str]:
         "fillColor": color,
         "fillOpacity": 0.7,
     }
-
-
-def _grade_legend_html() -> str:
-    rows = "".join(
-        '<div style="display:flex;align-items:center;margin-bottom:2px;">'
-        '<span style="display:inline-block;width:14px;height:14px;'
-        f'background:{color};margin-right:6px;border:1px solid #555;"></span>'
-        f"{grade}</div>"
-        for grade, color in GRADE_COLORS.items()
-    )
-    return (
-        '<div style="position:absolute;bottom:24px;right:24px;z-index:1000;'
-        'background:#fff;padding:8px 10px;border-radius:4px;box-shadow:0 1px 4px '
-        'rgba(0,0,0,.3);font:12px/1.4 sans-serif;">'
-        "<strong>Grade</strong><br/>" + rows + "</div>"
-    )
 
 
 def _inject_select_script(m: folium.Map, layer_label: str) -> None:
@@ -206,7 +199,8 @@ def _build_interactive_map(
             style_function=_grade_style,
             tooltip=folium.GeoJsonTooltip(**tooltip_kwargs),
         ).add_to(m)
-        m.get_root().html.add_child(folium.Element(_grade_legend_html()))
+        folium_inject_css(m, MAP_LEGEND_CSS)
+        m.get_root().html.add_child(folium.Element(grade_legend_html()))
     else:
         folium.Choropleth(
             geo_data=equity,
@@ -259,7 +253,7 @@ with st.sidebar:
     current = _current_geoid(data)
 
     def _fmt_option(geoid: str) -> str:
-        return f"{geoid} — {grade_by_geoid.get(geoid, '?')}"
+        return f"{geoid} · {grade_by_geoid.get(geoid, '?')}"
 
     chosen = st.selectbox(
         "Block group",
@@ -296,7 +290,11 @@ with tab_explore:
     st.session_state[LAYER_PARAM] = choice
 
     map_html = _build_interactive_map(data, choice)._repr_html_()
-    st.components.v1.html(map_html, height=640, scrolling=False)
+    st.iframe(
+        map_html,
+        height=640,
+        alt="Map of the selected Seattle transit equity layer",
+    )
 
 with tab_whatif:
     render_whatif(data)
