@@ -174,3 +174,32 @@ export const LAYERS: LayerConfig[] = [
 export function layerByKey(key: LayerKey): LayerConfig {
   return LAYERS.find((l) => l.key === key) ?? LAYERS[0]!;
 }
+
+/**
+ * Access score driving the isochrone-pulse radius (illustrative coverage
+ * metaphor). Per-category layers read their own `*_access` field; every
+ * other layer falls back to `access_overall`.
+ */
+export function accessScoreForLayer(
+  layer: LayerKey,
+  p: {
+    access_overall: number;
+    jobs_access: number;
+    healthcare_access: number;
+    food_access: number;
+    schools_access: number;
+  },
+): number {
+  switch (layer) {
+    case "access_jobs":
+      return p.jobs_access;
+    case "access_healthcare":
+      return p.healthcare_access;
+    case "access_food":
+      return p.food_access;
+    case "access_schools":
+      return p.schools_access;
+    default:
+      return p.access_overall;
+  }
+}

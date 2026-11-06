@@ -105,7 +105,7 @@ export function paintSketch(el: HTMLElement, seed?: number): void {
 const DEFAULT_TARGETS =
   ".dn-layer-tabs, .dn-map-legend, .dn-whatif-controls, .dn-callout, " +
   ".dn-table-wrap, .dn-export-snapshot, .dn-drawer, .dn-minimap, " +
-  ".dn-story, .dn-tour";
+  ".dn-story, .dn-tour, .dn-beforeafter";
 
 /** Paint every sketch target under `root`. Safe to call repeatedly. */
 export function paintSketchBoxes(

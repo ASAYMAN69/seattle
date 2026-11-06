@@ -1,17 +1,21 @@
 /**
- * Deep-links — `?geoid=<geoid>&layer=<layer>&view=<view>`.
+ * Deep-links — `?geoid=<geoid>&layer=<layer>&view=<view>&after=1`.
+ * (`after=1` means "If top recommendations ship"; anything else / missing
+ * means Today.)
  *
  * Parsing is tolerant: unknown/malformed params → graceful defaults
- * (map / need_index / no selection). Unknown geoids are kept as-is
- * (the drilldown's "not found" empty state handles them). Multi-value
- * params: first wins (URLSearchParams.get).
+ * (map / need_index / no selection / today). Unknown geoids are kept
+ * as-is (the drilldown's "not found" empty state handles them).
+ * Multi-value params: first wins (URLSearchParams.get).
  */
 import { LAYERS, type LayerKey } from "./colors";
-import type { AppState, ViewKey } from "../state";
+import type { AppState, BeforeAfter, ViewKey } from "../state";
 
 const VIEWS: ViewKey[] = ["map", "whatif", "export"];
 
-export type DeepLinkState = Partial<Pick<AppState, "view" | "layer" | "selectedGeoid">>;
+export type DeepLinkState = Partial<
+  Pick<AppState, "view" | "layer" | "selectedGeoid" | "beforeAfter">
+>;
 
 function parseView(raw: string | null): ViewKey | undefined {
   if (!raw) return undefined;
@@ -31,6 +35,14 @@ function parseGeoid(raw: string | null): string | undefined {
   return g ? g : undefined;
 }
 
+function parseAfter(raw: string | null): BeforeAfter | undefined {
+  if (!raw) return undefined;
+  const v = raw.trim().toLowerCase();
+  if (v === "1" || v === "after") return "after";
+  if (v === "0" || v === "today") return "today";
+  return undefined;
+}
+
 /** Parse a search string (with or without leading `?`) into deep-link state. */
 export function parseDeepLink(search: string): DeepLinkState {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
@@ -41,6 +53,8 @@ export function parseDeepLink(search: string): DeepLinkState {
   if (layer) out.layer = layer;
   const geoid = parseGeoid(params.get("geoid"));
   if (geoid) out.selectedGeoid = geoid;
+  const after = parseAfter(params.get("after"));
+  if (after) out.beforeAfter = after;
   return out;
 }
 
@@ -50,12 +64,13 @@ export function deepLinkFromLocation(): DeepLinkState {
   return parseDeepLink(window.location.search);
 }
 
-/** Build `?geoid=…&layer=…&view=…` (defaults omitted for short links). */
+/** Build `?geoid=…&layer=…&view=…&after=1` (defaults omitted for short links). */
 export function buildDeepLink(state: AppState): string {
   const params = new URLSearchParams();
   if (state.selectedGeoid) params.set("geoid", state.selectedGeoid);
   if (state.layer !== "need_index") params.set("layer", state.layer);
   if (state.view !== "map") params.set("view", state.view);
+  if (state.beforeAfter === "after") params.set("after", "1");
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }

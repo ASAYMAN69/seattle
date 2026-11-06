@@ -83,6 +83,26 @@ arrows step, focus returns on close. Empty states (no selection, unknown
 block group, no recommendations, corridor not found, snapshot empty) all
 carry the sketch style + wobbly-bus mascot.
 
+## Wow moments (§6B)
+
+1. **Commute narrator** (priority #1): "Hear the trip" in the story card
+   walks the anchor block group's wait / ride / walk / after steps with
+   the mascot driving the dashed route. Numbers cite prepared fields
+   only (headway + wait-saving from its recommendation, 0–1 access
+   scores, zero-car share); anything without a field is described
+   qualitatively. Reduced motion: static step captions, no drive.
+2. **Before / After toggle**: "Today" vs "If recommendations ship"
+   (deep-link `&after=1`). After = access + precomputed corridor gain
+   (`est_access_gain_mean`, reference 2.0×), need held fixed — Gap and
+   overall-access recolor with an estimated label; no re-routing.
+3. **Isochrone pulse**: click a block group for a wobbly illustrative
+   coverage circle whose radius scales with the active access layer
+   (Jobs/Healthcare/Food/Schools; otherwise overall access). Caption
+   always states it is a sketch, never a GIS isochrone.
+4. **Header count-up + equity ring gauge**: block-group / resident
+   counts count up on load; the ring shows mean overall access (0–1)
+   from the report-cards summary. Both `prefers-reduced-motion`-safe.
+
 ### Notes / assumptions for the Wizard (API) agent
 - `/api/equity` must be **ACS-joined** (add `poverty_pct`, `zero_car_pct`,
   `median_income` per block group), otherwise the drilldown stat tiles read as

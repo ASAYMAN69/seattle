@@ -3,10 +3,13 @@ import type { LayerKey } from "./lib/colors";
 
 export type ViewKey = "map" | "whatif" | "export";
 
+export type BeforeAfter = "today" | "after";
+
 export interface AppState {
   view: ViewKey;
   layer: LayerKey;
   selectedGeoid: string | null;
+  beforeAfter: BeforeAfter;
 }
 
 type Listener = (next: AppState, prev: AppState) => void;
@@ -15,6 +18,7 @@ const initialState: AppState = {
   view: "map",
   layer: "need_index",
   selectedGeoid: null,
+  beforeAfter: "today",
 };
 
 let state: AppState = { ...initialState };
@@ -35,7 +39,8 @@ function set(patch: Partial<AppState>): void {
   if (
     next.view === prev.view &&
     next.layer === prev.layer &&
-    next.selectedGeoid === prev.selectedGeoid
+    next.selectedGeoid === prev.selectedGeoid &&
+    next.beforeAfter === prev.beforeAfter
   ) {
     return;
   }
@@ -47,6 +52,7 @@ export const actions = {
   setView: (view: ViewKey) => set({ view }),
   setLayer: (layer: LayerKey) => set({ layer }),
   selectGeoid: (geoid: string | null) => set({ selectedGeoid: geoid }),
+  setBeforeAfter: (beforeAfter: BeforeAfter) => set({ beforeAfter }),
   /** Atomic restore (used by deep-link boot): one notification, one render. */
   restore: (patch: Partial<AppState>) => set(patch),
 };

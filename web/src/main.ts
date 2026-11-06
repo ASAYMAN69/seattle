@@ -15,12 +15,13 @@ import { MapView } from "./components/map-view";
 import { Onboarding, shouldShowTour } from "./components/onboarding";
 import { StoryPanel } from "./components/story-panel";
 import { WhatIfView } from "./components/whatif";
+import { computeGainsByGeoid } from "./lib/before-after";
 import { LAYERS, type LayerKey } from "./lib/colors";
 import { busMark, busSvg } from "./lib/mascot";
 import { paintSketchBoxes } from "./lib/sketch";
 import { pickStoryAnchor } from "./lib/story";
 import { deepLinkFromLocation, shareUrl, syncUrl } from "./lib/url";
-import { actions, getState, subscribe, type ViewKey } from "./state";
+import { actions, getState, subscribe, type BeforeAfter, type ViewKey } from "./state";
 import type {
   EquityFeature,
   EquityFeatureCollection,
@@ -49,6 +50,14 @@ app.innerHTML = `
       </div>
       <div class="dn-header-actions">
         <div class="dn-meta dn-muted" id="city-summary"></div>
+        <span class="dn-gauge" id="equity-gauge" hidden>
+          <svg class="dn-gauge-ring" viewBox="0 0 36 36" width="36" height="36" aria-hidden="true" focusable="false">
+            <circle class="dn-gauge-track" cx="18" cy="18" r="15.5" fill="none" stroke-width="3.5" />
+            <circle class="dn-gauge-fill" cx="18" cy="18" r="15.5" fill="none" stroke-width="3.5" />
+          </svg>
+          <span class="dn-gauge-value" id="equity-gauge-value">—</span>
+          <span class="dn-gauge-label">mean access</span>
+        </span>
         <button class="dn-copy" id="copy-link" type="button" aria-live="polite">Copy link</button>
       </div>
     </div>
@@ -64,6 +73,10 @@ app.innerHTML = `
     <section class="dn-view dn-view-map is-active" data-view="map">
       <div id="map" class="dn-map" role="application" aria-label="Seattle transit equity map"></div>
       <div class="dn-layer-tabs sketch-card" role="group" aria-label="Analysis layer"></div>
+      <div class="dn-beforeafter sketch-card" role="group" aria-label="Before or after recommendations">
+        <button class="dn-ba-btn is-active" data-mode="today" type="button" aria-pressed="true">Today</button>
+        <button class="dn-ba-btn" data-mode="after" type="button" aria-pressed="false">If recommendations ship</button>
+      </div>
       <div id="story"></div>
       <div id="scrim" class="dn-scrim" aria-hidden="true"></div>
       <div id="drilldown"></div>
@@ -143,8 +156,10 @@ function boot(): void {
   actions.restore(deepLinkFromLocation());
   buildNav();
   buildLayerTabs();
+  buildBeforeAfter();
   updateNav();
   updateLayerTabs();
+  updateBeforeAfter();
   scrim.addEventListener("click", () => actions.selectGeoid(null));
   wireCopyLink();
 
@@ -152,6 +167,7 @@ function boot(): void {
   subscribe((next, prev) => {
     updateNav();
     updateLayerTabs();
+    updateBeforeAfter();
     if (next.view !== prev.view) staggerView(next.view);
     updateScrim();
     syncUrl(next);
@@ -245,6 +261,23 @@ function updateLayerTabs(): void {
   }
 }
 
+function updateBeforeAfter(): void {
+  const current = getState().beforeAfter;
+  for (const btn of document.querySelectorAll<HTMLButtonElement>(".dn-ba-btn")) {
+    const active = btn.dataset.mode === current;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-pressed", String(active));
+  }
+}
+
+function buildBeforeAfter(): void {
+  for (const btn of document.querySelectorAll<HTMLButtonElement>(".dn-ba-btn")) {
+    btn.addEventListener("click", () => {
+      actions.setBeforeAfter(btn.dataset.mode as BeforeAfter);
+    });
+  }
+}
+
 function buildNav(): void {
   for (const btn of nav.querySelectorAll<HTMLButtonElement>(".dn-navbtn")) {
     btn.addEventListener("click", () => {
@@ -322,12 +355,70 @@ function renderCitySummary(): void {
     .then((rc) => {
       const s = rc.summary;
       const el = document.getElementById("city-summary");
-      if (el && s) {
-        el.textContent = `${s.n_block_groups.toLocaleString("en-US")} block groups · ` +
-          `${s.total_recommended_population.toLocaleString("en-US")} residents in recommended corridors`;
+      if (!el || !s) return;
+      el.innerHTML =
+        `<span class="dn-meta-count" data-count="${s.n_block_groups}">0</span> block groups · ` +
+        `<span class="dn-meta-count" data-count="${s.total_recommended_population}">0</span> residents in recommended corridors`;
+      // Count-ups (instant under reduced motion via lib/countup).
+      for (const span of el.querySelectorAll<HTMLElement>(".dn-meta-count")) {
+        const target = Number(span.dataset.count);
+        if (Number.isFinite(target)) {
+          span.textContent = "0";
+          void animateCount(span, target, (v) => Math.round(v).toLocaleString("en-US"));
+        }
+      }
+      // Ring gauge: mean overall access (0–1, real summary value).
+      const gauge = document.getElementById("equity-gauge");
+      const fill = gauge?.querySelector<SVGCircleElement>(".dn-gauge-fill");
+      const value = gauge?.querySelector<HTMLElement>("#equity-gauge-value");
+      const meanAccess = s.mean_access_overall;
+      if (gauge && fill && value && Number.isFinite(meanAccess)) {
+        gauge.hidden = false;
+        const clamped = Math.min(Math.max(meanAccess, 0), 1);
+        const C = 2 * Math.PI * 15.5;
+        fill.style.strokeDasharray = String(C);
+        fill.style.strokeDashoffset = String(C);
+        value.textContent = clamped.toFixed(2);
+        const apply = (frac: number): void => {
+          fill.style.strokeDashoffset = String(C * (1 - frac));
+        };
+        if (prefersReducedMotion()) {
+          apply(clamped);
+        } else {
+          requestAnimationFrame(() => requestAnimationFrame(() => apply(clamped)));
+        }
       }
     })
     .catch(() => { /* non-critical */ });
+}
+
+const countUpFrames = new WeakMap<HTMLElement, number>();
+
+/** Ease-out count-up for header numbers (650 ms, reduced-motion safe). */
+function animateCount(
+  el: HTMLElement,
+  target: number,
+  format: (v: number) => string,
+): void {
+  const prev = countUpFrames.get(el);
+  if (prev) cancelAnimationFrame(prev);
+  if (prefersReducedMotion()) {
+    el.textContent = format(target);
+    return;
+  }
+  const start = performance.now();
+  const tick = (now: number): void => {
+    const t = Math.min((now - start) / 650, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = format(target * eased);
+    if (t < 1) countUpFrames.set(el, requestAnimationFrame(tick));
+    else el.textContent = format(target);
+  };
+  countUpFrames.set(el, requestAnimationFrame(tick));
+}
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function mount(bundle: DataBundle): void {
@@ -339,10 +430,16 @@ function mount(bundle: DataBundle): void {
   bootState.classList.remove("dn-boot-error");
   bootState.hidden = true;
 
+  const gains = computeGainsByGeoid(
+    bundle.recommendations.features.map((f) => f.properties),
+    bundle.sensitivity,
+  );
+
   const mapView = new MapView({
     container: document.getElementById("map")!,
     equity: bundle.equity,
     boundary: bundle.boundary,
+    gains,
   });
 
   const drilldown = new Drilldown({
@@ -372,6 +469,7 @@ function mount(bundle: DataBundle): void {
       container: document.getElementById("story")!,
       feature: anchorFeature,
       recommendations: bundle.recommendations.features,
+      sensitivity: bundle.sensitivity,
     });
   }
 
