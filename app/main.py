@@ -13,18 +13,23 @@ renders the neighborhood Equity Report Card
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 import folium
 import streamlit as st
 
-from datanova import __version__
-from app.data_io import PreparedDataError, load_prepared
-from app.views.export import render_export
-from app.views.map_view import ANALYSIS_LAYERS, GRADE_COLORS
-from app.views.report_card import render_report_card
-from app.views.whatif import render_whatif
+# Ensure the repo root is importable regardless of how Streamlit launches this
+# script (streamlit run app/main.py does not put the project root on sys.path).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from datanova import __version__  # noqa: E402
+from app.data_io import PreparedDataError, load_prepared  # noqa: E402
+from app.views.export import render_export  # noqa: E402
+from app.views.map_view import ANALYSIS_LAYERS, GRADE_COLORS  # noqa: E402
+from app.views.report_card import render_report_card  # noqa: E402
+from app.views.whatif import render_whatif  # noqa: E402
 
 st.set_page_config(page_title="Seattle Transit Equity Index", layout="wide")
 
