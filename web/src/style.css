@@ -1,0 +1,1172 @@
+/* ================================================================== */
+/* Seattle Transit Equity Index — SPA styles                           */
+/* Sketch / hand-drawn chrome layered UNDER the civic, colorblind-safe  */
+/* analysis palettes (YlOrBr/Blues sequential, RdBu diverging, A–F).   */
+/* Data layers are untouched: the sketch belongs to the chrome.        */
+/* ================================================================== */
+
+:root {
+  /* --- Warm paper + ink (chrome) --- */
+  --paper: #f6f0e4;        /* page ground */
+  --paper-2: #fbf7ee;      /* raised surface */
+  --paper-3: #ede4d2;      /* sunken surface */
+  --ink: #2c2822;          /* primary text / ink strokes */
+  --ink-soft: #5b534a;     /* secondary text */
+  --muted: #6a6156;        /* tertiary text (AA on paper) */
+  --line: #3a342c;         /* sketch stroke color (used at low opacity) */
+  --line-soft: rgba(58, 52, 44, 0.38);
+
+  /* --- Cheerful accents (under the data palettes) --- */
+  --accent: #c4622d;       /* bus amber — primary accent */
+  --accent-deep: #a34e22;
+  --accent-soft: #f0ddc4;
+  --accent-2: #31785e;     /* friendly green — ready / success */
+  --accent-2-soft: #dceadf;
+
+  /* --- Analysis palettes (preserved, single source of truth) --- */
+  --grade-a: #1a7f37;
+  --grade-b: #2d9d4f;
+  --grade-c: #e3b341;
+  --grade-d: #e0762a;
+  --grade-f: #c62828;
+  --grade-unknown: #6b7280;
+  --map-line: #1f3a5f;
+  --map-fill: #d9e2ec;
+  --missing: #eef0f2;
+
+  /* --- Type --- */
+  --font-sans: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-hand: "Kalam", "Comic Sans MS", "Segoe Print", cursive;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- Sketch radius kit (irregular, hand-rolled) --- */
+  --r-a: 12px 9px 13px 8px / 9px 12px 8px 13px;
+  --r-b: 9px 13px 8px 12px / 13px 8px 12px 9px;
+  --r-pill: 999px 999px 999px 999px;
+
+  /* --- Motion: strong ease-out (enter) + drawer curve --- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --shadow-paper: 0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 8px 20px -14px rgba(70, 52, 28, 0.45);
+  --shadow-lift: 0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 10px 26px -14px rgba(70, 52, 28, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+}
+
+/* Paper grain — fixed, pointer-events-none overlay (never on scroll
+   containers; cheap, GPU-friendly, and it does not hurt legibility). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+#app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+.dn-muted {
+  color: var(--muted);
+}
+
+/* Sketch surfaces: irregular multi-radius + subtle jitter rotation.
+   SINGLE-TREATMENT RULE (Task 004): large chrome gets exactly one outline
+   — the hand-drawn Rough.js stroke (see src/lib/sketch.ts) with NO CSS
+   border — while small tiles/dense UI use CSS borders only (never Rough).
+   .sketch-card marks Rough.js hosts (radius/shadow only, no border). */
+.sketch-card {
+  border-radius: var(--r-a);
+  box-shadow: var(--shadow-paper);
+}
+
+.sketch-pill {
+  border-radius: var(--r-pill);
+}
+
+/* SVG overlay used by rough.js sketch boxes */
+.dn-sketch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.dn-sketch ~ *,
+.dn-sketch ~ .dn-sketch,
+:is(.dn-sketch) + * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================================================== */
+/* Header + nav                                                        */
+/* ================================================================== */
+
+.dn-header {
+  background: var(--paper-2);
+  border-bottom: 1.5px solid var(--line-soft);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.dn-header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 12px 24px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dn-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dn-brand-mark {
+  width: 30px;
+  height: 30px;
+  color: var(--accent);
+  flex: none;
+  transform: rotate(-3deg);
+}
+
+.dn-title {
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.dn-tagline {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.dn-meta {
+  font-size: 0.82rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.dn-nav {
+  display: flex;
+  gap: 6px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 4px 24px 12px;
+}
+
+.dn-navbtn {
+  appearance: none;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: var(--font-hand);
+  padding: 7px 15px 5px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: transform 140ms var(--ease-out), background 140ms ease,
+    color 140ms ease, border-color 140ms ease;
+}
+
+.dn-navbtn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dn-navbtn:hover {
+    color: var(--ink);
+    background: var(--paper-3);
+    transform: rotate(-1deg);
+  }
+}
+
+.dn-navbtn.is-active {
+  background: var(--ink);
+  color: var(--paper-2);
+  border-color: var(--ink);
+  transform: rotate(-1.2deg);
+}
+
+.dn-navbtn.is-active:active {
+  transform: rotate(-1.2deg) translateY(1px) scale(0.97);
+}
+
+/* ================================================================== */
+/* Main / views                                                        */
+/* ================================================================== */
+
+.dn-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.dn-view {
+  display: none;
+}
+
+.dn-view.is-active {
+  display: block;
+  animation: dnViewEnter 300ms var(--ease-out) both;
+}
+
+@keyframes dnViewEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) rotate(-0.2deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dn-view-map.is-active {
+  display: flex;
+}
+
+.dn-view-map {
+  position: relative;
+  flex: 1;
+  min-height: 540px;
+}
+
+.dn-view:not(.dn-view-map) {
+  overflow-y: auto;
+}
+
+.dn-view-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Staggered reveal for view content (30–50ms cascade). */
+.dn-stagger {
+  animation: dnFadeUp 280ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes dnFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ================================================================== */
+/* Map (hero)                                                          */
+/* ================================================================== */
+
+#map.dn-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dn-map .maplibregl-ctrl-attrib {
+  font-size: 10px;
+  background: rgba(251, 247, 238, 0.85) !important;
+  color: var(--muted);
+}
+
+.dn-layer-tabs {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--paper-2);
+  border-radius: var(--r-a);
+  padding: 6px;
+  box-shadow: var(--shadow-lift);
+  max-width: calc(100% - 32px);
+}
+
+.dn-layer-pill {
+  appearance: none;
+  border: 1.5px solid transparent;
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.82rem;
+  font-family: var(--font-hand);
+  color: var(--ink-soft);
+  padding: 6px 12px 4px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: transform 130ms var(--ease-out), background 140ms ease,
+    color 140ms ease;
+}
+
+.dn-layer-pill:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dn-layer-pill:hover {
+    background: var(--paper-3);
+  }
+}
+
+.dn-layer-pill.is-active {
+  background: var(--ink);
+  color: var(--paper-2);
+  border-color: var(--ink);
+  transform: rotate(-1deg);
+}
+
+.dn-layer-pill.is-active:active {
+  transform: rotate(-1deg) translateY(1px) scale(0.95);
+}
+
+/* Legend overlay (sketch outline painted by rough.js) */
+.dn-map-legend {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 20;
+  background: var(--paper-2);
+  border-radius: var(--r-a);
+  box-shadow: var(--shadow-lift);
+  padding: 12px 14px;
+  width: 232px;
+}
+
+.dn-map-legend-title {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.dn-legend-grade-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.dn-legend-grade-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.dn-legend-swatch {
+  width: 100%;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(58, 52, 44, 0.4);
+}
+
+.dn-legend-gradient {
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  margin: 8px 0 4px;
+}
+
+.dn-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.dn-map-legend-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+/* ================================================================== */
+/* Boot / loading / error (mascot scene)                               */
+/* ================================================================== */
+
+.dn-boot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 50;
+  background: var(--paper);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.dn-boot-scene {
+  position: relative;
+  width: min(340px, 78vw);
+  height: 96px;
+}
+
+.dn-boot-track {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 40px;
+  height: 34px;
+}
+
+.dn-boot-route {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 14px;
+  width: 100%;
+  height: 10px;
+  overflow: visible;
+}
+
+.dn-boot-route path {
+  stroke: var(--line);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 2 12;
+  fill: none;
+  opacity: 0.85;
+}
+
+.dn-boot-bus {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42px;
+  height: 34px;
+  animation: dnBootDrive 2.4s var(--ease-in-out) forwards;
+}
+
+@keyframes dnBootDrive {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--drive-distance, 300px));
+  }
+}
+
+.dn-boot-bus .dn-wheel {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: spin 900ms linear infinite;
+}
+
+.dn-boot-progress {
+  width: min(320px, 72vw);
+  height: 12px;
+  border-radius: var(--r-pill);
+  background: var(--paper-3);
+  border: 1.5px solid var(--line-soft);
+  overflow: hidden;
+}
+
+.dn-boot-progress-bar {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  animation: dnBootProgress 2.4s linear forwards;
+}
+
+@keyframes dnBootProgress {
+  to {
+    width: 100%;
+  }
+}
+
+.dn-boot-label {
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  text-align: center;
+  max-width: 60ch;
+}
+
+.dn-boot-stamp {
+  font-family: var(--font-hand);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  padding: 2px 10px;
+  border: 1.5px dashed var(--accent-2);
+  border-radius: 6px;
+  transform: rotate(-2deg);
+  animation: dnStampPop 320ms var(--ease-out) both;
+}
+
+@keyframes dnStampPop {
+  from {
+    opacity: 0;
+    transform: scale(0.92) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-2deg);
+  }
+}
+
+.dn-boot-error {
+  color: var(--grade-f);
+}
+
+.dn-boot-error .dn-boot-bus {
+  animation: none;
+}
+
+.dn-boot-error .dn-boot-progress {
+  display: none;
+}
+
+/* ================================================================== */
+/* Drilldown drawer (slide-over / bottom sheet) + scrim                */
+/* ================================================================== */
+
+.dn-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background: rgba(44, 40, 34, 0.35);
+  opacity: 0;
+  transition: opacity 260ms ease;
+  pointer-events: none;
+}
+
+.dn-scrim.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dn-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(430px, 94vw);
+  background: var(--paper-2);
+  /* Rough.js host: outline is the hand-drawn stroke only (no CSS edge). */
+  box-shadow: -10px 0 28px -16px rgba(70, 52, 28, 0.5);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(102%);
+  transition: transform 280ms var(--ease-drawer), visibility 280ms;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.dn-drawer[hidden] {
+  display: none;
+}
+
+.dn-drawer:not([hidden]) {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.dn-drawer-body {
+  padding: 56px 22px 28px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.dn-drawer-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-b);
+  border: 1.5px solid var(--line-soft);
+  background: var(--paper-2);
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 130ms var(--ease-out), background 140ms ease;
+}
+
+.dn-drawer-close:active {
+  transform: scale(0.94);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dn-drawer-close:hover {
+    background: var(--paper-3);
+  }
+}
+
+.dn-id-title {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+
+.dn-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dn-stat {
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-b);
+  background: var(--paper-2);
+  box-shadow: var(--shadow-paper);
+  padding: 10px 12px;
+}
+
+.dn-stat-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.dn-stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.02rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.dn-section-label {
+  font-family: var(--font-hand);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.dn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.dn-chip {
+  display: inline-block;
+  padding: 3px 12px 1px;
+  border-radius: var(--r-pill);
+  background: var(--dn-grade-bg, var(--grade-unknown));
+  color: #fff;
+  font-weight: 700;
+  font-family: var(--font-hand);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  border: 1.5px solid rgba(44, 40, 34, 0.25);
+  transform: rotate(-0.5deg);
+}
+
+.dn-chip:nth-child(even) {
+  transform: rotate(0.6deg);
+}
+
+@supports (background: color-mix(in srgb, red 50%, white)) {
+  .dn-chip {
+    background: color-mix(in srgb, var(--dn-grade-bg, #6b7280) 24%, #ffffff);
+    color: color-mix(in srgb, var(--dn-grade-bg, #6b7280) 74%, #0f172a);
+  }
+}
+
+.dn-rec-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dn-rec-list li {
+  border: 1.5px solid var(--line-soft);
+  border-left: 4px solid var(--accent);
+  background: var(--paper-2);
+  border-radius: var(--r-b);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-paper);
+}
+
+.dn-rec-corridor {
+  font-weight: 700;
+  font-size: 0.93rem;
+}
+
+.dn-rec-action {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.dn-rec-pop {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+
+/* ================================================================== */
+/* What-if explorer                                                    */
+/* ================================================================== */
+
+.dn-whatif-controls {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr;
+  gap: 20px;
+  background: var(--paper-2);
+  padding: 20px;
+}
+
+.dn-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dn-field-label {
+  font-weight: 600;
+  font-size: 0.86rem;
+  font-family: var(--font-hand);
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.dn-select {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--paper-2)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235b534a' d='M6 8 0 0h12z'/%3E%3C/svg%3E")
+    no-repeat right 12px center;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-b);
+  padding: 9px 34px 9px 12px;
+  appearance: none;
+  cursor: pointer;
+  transition: transform 130ms var(--ease-out), border-color 140ms ease;
+}
+
+.dn-select:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.dn-range {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.dn-slider-output {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent-deep);
+}
+
+.dn-range-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* Rough.js host (sketch-card): outline is the hand-drawn stroke only.
+   Background tint carries the accent (no CSS border, no side stripe). */
+.dn-callout {
+  background: var(--accent-soft);
+  border-radius: var(--r-b);
+  padding: 14px 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dn-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.dn-metric {
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-b);
+  background: var(--paper-2);
+  box-shadow: var(--shadow-paper);
+  padding: 16px;
+}
+
+.dn-metric-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.dn-metric-value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.dn-metric-hint {
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* Rough.js host (sketch-card): outline is the hand-drawn stroke only. */
+.dn-minimap {
+  height: 420px;
+  border-radius: var(--r-a);
+  overflow: hidden;
+  box-shadow: var(--shadow-paper);
+}
+
+/* ================================================================== */
+/* Export                                                              */
+/* ================================================================== */
+
+.dn-panel-head h2 {
+  font-family: var(--font-hand);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.dn-panel-head p {
+  font-size: 0.9rem;
+  max-width: 72ch;
+  color: var(--muted);
+}
+
+.dn-export-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dn-export-title-row h3 {
+  font-family: var(--font-hand);
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.dn-table-wrap {
+  background: var(--paper-2);
+  border-radius: var(--r-a);
+  box-shadow: var(--shadow-lift);
+  max-height: 460px;
+  overflow: auto;
+  padding: 2px; /* breathing room for the sketch stroke */
+}
+
+.dn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.dn-table th {
+  position: sticky;
+  top: 0;
+  background: var(--paper-3);
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-bottom: 1.5px solid var(--line-soft);
+  white-space: nowrap;
+}
+
+.dn-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dn-table tbody tr {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.dn-table tbody tr:hover {
+  background: var(--paper-3);
+}
+
+.dn-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dn-btn {
+  appearance: none;
+  background: var(--ink);
+  color: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-b);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  font-size: 0.9rem;
+  padding: 8px 16px 6px;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-out), background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.dn-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dn-btn:hover {
+    background: var(--accent-deep);
+    border-color: var(--accent-deep);
+    transform: rotate(-0.6deg);
+  }
+}
+
+.dn-export-snapshot {
+  background: var(--paper-2);
+  border-radius: var(--r-a);
+  padding: 20px;
+}
+
+.dn-empty {
+  border: 1.5px dashed var(--line);
+  border-radius: var(--r-a);
+  padding: 22px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--paper-2);
+}
+
+.dn-empty strong {
+  color: var(--ink);
+}
+
+.dn-empty .dn-mascot {
+  display: block;
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  color: var(--accent);
+}
+
+/* ================================================================== */
+/* Reduced motion                                                      */
+/* ================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .dn-boot-route,
+  .dn-boot-bus {
+    display: none;
+  }
+
+  .dn-boot-progress-bar {
+    width: 92%;
+  }
+}
+
+/* ================================================================== */
+/* Responsive ≤720px                                                   */
+/* ================================================================== */
+
+@media (max-width: 720px) {
+  .dn-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px 8px;
+    gap: 6px;
+  }
+
+  .dn-meta {
+    text-align: left;
+  }
+
+  .dn-nav {
+    padding: 0 16px 10px;
+  }
+
+  .dn-navbtn {
+    flex: 1;
+    text-align: center;
+    padding: 7px 8px 5px;
+    font-size: 0.84rem;
+  }
+
+  .dn-view-inner {
+    padding: 18px 16px 48px;
+    gap: 16px;
+  }
+
+  .dn-layer-tabs {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .dn-layer-pill {
+    flex: 1 1 auto;
+    text-align: center;
+    min-height: 44px;
+    padding: 6px 6px 4px;
+    font-size: 0.8rem;
+  }
+
+  .dn-map-legend {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+
+  .dn-map-legend-note {
+    display: none;
+  }
+
+  .dn-drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: min(70dvh, 560px);
+    border: none;
+    transform: translateY(102%);
+  }
+
+  .dn-drawer:not([hidden]) {
+    transform: translateY(0);
+  }
+
+  .dn-whatif-controls {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .dn-minimap {
+    height: 320px;
+  }
+
+  .dn-metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dn-boot-scene {
+    width: min(300px, 84vw);
+  }
+}
