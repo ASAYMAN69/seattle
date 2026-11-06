@@ -10,6 +10,7 @@ import { countUpTo } from "../lib/countup";
 import { escapeHtml, fmtCurrency, fmtInt, fmtPct } from "../lib/format";
 import { busSvg } from "../lib/mascot";
 import { paintSketchBoxes } from "../lib/sketch";
+import { pickStoryAnchor } from "../lib/story";
 import { actions, getState, subscribe } from "../state";
 import type {
   EquityFeature,
@@ -35,11 +36,17 @@ export class Drilldown {
   private recommendations: RecommendationFeature[];
   private unsub: () => void;
   private closeBtn: HTMLButtonElement;
+  private anchorGeoid: string | null;
 
   constructor(options: DrilldownOptions) {
     this.container = options.container;
     this.equityById = options.equityById;
     this.recommendations = options.recommendations;
+    const anchor = pickStoryAnchor({
+      type: "FeatureCollection",
+      features: [...this.equityById.values()],
+    });
+    this.anchorGeoid = anchor ? String(anchor.properties.geoid) : null;
 
     this.container.classList.add("dn-drawer");
     this.container.setAttribute("role", "dialog");
@@ -104,6 +111,12 @@ export class Drilldown {
       if (p.BLKGRPCE) idLine += ` / BG ${escapeHtml(p.BLKGRPCE)}`;
     }
     identity.innerHTML = `<div class="dn-id-title">${idLine}</div>`;
+    if (this.anchorGeoid && geoid === this.anchorGeoid) {
+      const note = document.createElement("div");
+      note.className = "dn-anchor-note";
+      note.innerHTML = `<span class="dn-anchor-mascot" aria-hidden="true">${busSvg({ size: 28 })}</span><span>This is the index’s human story anchor — the neighborhood that shaped this map. Every number above and below is real prepared data.</span>`;
+      identity.appendChild(note);
+    }
 
     // ACS stat tiles (count-up on open; instant under reduced motion).
     const stats = document.createElement("div");
@@ -166,7 +179,7 @@ export class Drilldown {
     if (recs.length === 0) {
       const none = document.createElement("div");
       none.className = "dn-empty";
-      none.innerHTML = `<p class="dn-muted" style="margin:0">No corridor recommendations currently target this block group.</p>`;
+      none.innerHTML = `<span class="dn-mascot" aria-hidden="true">${busSvg({ size: 56 })}</span><p class="dn-muted" style="margin:0">No corridor recommendations currently target this block group.</p>`;
       recSection.appendChild(none);
     } else {
       const list = document.createElement("ul");

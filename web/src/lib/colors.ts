@@ -69,7 +69,21 @@ export const SERVED_OUTLINE = "#b45309";
 export const SERVED_FILL = "#f59e0b";
 export const CORRIDOR_COLOR = "#b91c1c";
 
-export type LayerKey = "need_index" | "access_overall" | "gap" | "grade";
+/**
+ * Access-story layers (Task 005): per-category transit access from the
+ * existing `*_access` fields (0–1, higher = better). They reuse the
+ * established ACCESS_RAMP (Blues sequential) domain [0, 1] — no new
+ * palette, existing ramps untouched.
+ */
+export type LayerKey =
+  | "need_index"
+  | "access_overall"
+  | "gap"
+  | "grade"
+  | "access_jobs"
+  | "access_healthcare"
+  | "access_food"
+  | "access_schools";
 
 export interface LayerConfig {
   key: LayerKey;
@@ -118,6 +132,42 @@ export const LAYERS: LayerConfig[] = [
     legend: "Equity grade by dimension (A best → F worst)",
     kind: "grade",
     column: "grade",
+  },
+  {
+    key: "access_jobs",
+    label: "Jobs access",
+    legend: "Transit access to jobs (higher = more jobs reachable)",
+    kind: "sequential",
+    column: "jobs_access",
+    ramp: ACCESS_RAMP,
+    domain: [0, 1],
+  },
+  {
+    key: "access_healthcare",
+    label: "Healthcare access",
+    legend: "Transit access to healthcare (higher = better served)",
+    kind: "sequential",
+    column: "healthcare_access",
+    ramp: ACCESS_RAMP,
+    domain: [0, 1],
+  },
+  {
+    key: "access_food",
+    label: "Food access",
+    legend: "Transit access to food (higher = better served)",
+    kind: "sequential",
+    column: "food_access",
+    ramp: ACCESS_RAMP,
+    domain: [0, 1],
+  },
+  {
+    key: "access_schools",
+    label: "Schools access",
+    legend: "Transit access to schools (higher = better served)",
+    kind: "sequential",
+    column: "schools_access",
+    ramp: ACCESS_RAMP,
+    domain: [0, 1],
   },
 ];
 

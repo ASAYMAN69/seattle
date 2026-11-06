@@ -1055,6 +1055,280 @@ button {
 }
 
 /* ================================================================== */
+/* Extra features (Task 005): copy link, story anchor, tour            */
+/* ================================================================== */
+
+.dn-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.dn-copy {
+  appearance: none;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+  color: var(--ink);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  font-size: 0.85rem;
+  padding: 6px 12px 4px;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-out), background 140ms ease;
+}
+
+.dn-copy:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dn-copy:hover {
+    background: var(--paper-3);
+  }
+}
+
+.dn-copy.is-copied {
+  background: var(--accent-2-soft);
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+
+.dn-share-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.dn-anchor-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: var(--accent-soft);
+  border-radius: var(--r-b);
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.dn-anchor-mascot {
+  flex: none;
+  display: inline-flex;
+  color: var(--accent);
+}
+
+/* Story anchor card (map bottom-left) */
+.dn-story {
+  position: absolute;
+  left: 16px;
+  bottom: 18px;
+  z-index: 20;
+  width: min(340px, calc(100% - 32px));
+  background: var(--paper-2);
+  padding: 14px 16px;
+  animation: dnFadeUp 240ms var(--ease-out) both;
+}
+
+.dn-story-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.dn-story-mascot {
+  flex: none;
+  display: inline-flex;
+  color: var(--accent);
+}
+
+.dn-story-head-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dn-story-kicker {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+.dn-story-title {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.dn-story-close {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-b);
+  border: 1.5px solid var(--line-soft);
+  background: var(--paper-2);
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: transform 120ms var(--ease-out);
+}
+
+.dn-story-close:active {
+  transform: scale(0.94);
+}
+
+.dn-story-text {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.dn-story-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dn-story-cta {
+  font-size: 0.85rem;
+  padding: 7px 14px 5px;
+}
+
+/* Guided tour (first-visit overlay) */
+.dn-tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dn-tour-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 40, 34, 0.4);
+}
+
+.dn-tour {
+  position: relative;
+  width: min(420px, 100%);
+  background: var(--paper-2);
+  padding: 20px;
+  animation: dnFadeUp 280ms var(--ease-out) both;
+}
+
+.dn-tour-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dn-tour-mascot {
+  flex: none;
+  display: inline-flex;
+  color: var(--accent);
+}
+
+.dn-tour-title {
+  flex: 1 1 auto;
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.dn-tour-close {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-b);
+  border: 1.5px solid var(--line-soft);
+  background: var(--paper-2);
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: transform 120ms var(--ease-out);
+}
+
+.dn-tour-close:active {
+  transform: scale(0.94);
+}
+
+.dn-tour-step-enter {
+  animation: dnFadeUp 200ms var(--ease-out) both;
+}
+
+.dn-tour-step-title {
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.dn-tour-step-copy {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  min-height: 3.5em;
+}
+
+.dn-tour-dots {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.dn-tour-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--paper-3);
+  border: 1.5px solid var(--line-soft);
+}
+
+.dn-tour-dot.is-active {
+  background: var(--accent);
+  border-color: var(--accent-deep);
+}
+
+.dn-tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dn-tour-spacer {
+  flex: 1 1 auto;
+}
+
+.dn-tour-again {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.dn-tour-again input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+/* ================================================================== */
 /* Reduced motion                                                      */
 /* ================================================================== */
 
@@ -1168,5 +1442,37 @@ button {
 
   .dn-boot-scene {
     width: min(300px, 84vw);
+  }
+
+  .dn-header-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .dn-copy {
+    min-height: 44px;
+    padding: 8px 14px 6px;
+    font-size: 0.85rem;
+  }
+
+  /* Stack story above the legend (legend ~90px tall with note hidden).
+     Clamp height so the map stays visible on small screens. */
+  .dn-story {
+    left: 10px;
+    right: 10px;
+    bottom: 112px;
+    width: auto;
+    padding: 12px 14px;
+    max-height: 42dvh;
+    overflow-y: auto;
+  }
+
+  .dn-tour-root {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .dn-tour {
+    width: 100%;
   }
 }

@@ -5,7 +5,11 @@ Streamlit frontend with the same four functional areas, behavior-identical:
 
 1. **Map explorer** — full-bleed MapLibre map. Layer toggle pills for
    Need Index (YlOrBr), Access (Blues), Equity Gap (RdBu diverging), Grade A–F
-   (categorical). Boundary outline. Click a block group to open its report card.
+   (categorical), plus four per-category Access stories — Jobs / Healthcare /
+   Food / Schools access (Blues, 0–1) from the existing `*_access` fields.
+   Boundary outline. Click a block group to open its report card. A
+   prominent "Meet block group …" card surfaces a real low-income story
+   anchor (deterministic pick from prepared data; see `src/lib/story.ts`).
 2. **Drilldown** — slide-over / bottom-sheet report card: identity, ACS stat
    tiles (population, poverty %, zero-car %, median income), grade chips
    (Jobs/Healthcare/Schools/Food/Overall), and top corridor recommendations.
@@ -55,6 +59,29 @@ FastAPI service serves (and serves `web/dist/` statically in production).
 | `GET /api/metadata` | `{ generated_at, summary, methodology_note }` |
 
 Types mirror the real prepared data (`data/prepared/`) — see `src/types.ts`.
+
+## Deep-links
+
+Shareable UI state: `?geoid=<geoid>&layer=<layer>&view=<view>` (see `src/lib/url.ts`).
+
+- `view` — `map` (default), `whatif`, `export`.
+- `layer` — `need_index` (default), `access_overall`, `gap`, `grade`,
+  `access_jobs`, `access_healthcare`, `access_food`, `access_schools`.
+- `geoid` — a block-group string (e.g. `530330291023`). Unknown or missing
+  geoids fall back to the existing "not found" empty state.
+
+On load the app restores the URL state; every state change keeps the
+address bar in sync (`replaceState`, no history spam). "Copy link" in the
+header copies the full share URL (with clipboard fallback).
+
+## Onboarding
+
+A first-visit guided tour walks the 90-second flow (map → report card →
+what-if → export) in 4 steps. Dismiss with ×/Skip/Escape; "Don't show
+again" persists via `localStorage` (`dn_onboarding_dismissed`). Keyboard
+arrows step, focus returns on close. Empty states (no selection, unknown
+block group, no recommendations, corridor not found, snapshot empty) all
+carry the sketch style + wobbly-bus mascot.
 
 ### Notes / assumptions for the Wizard (API) agent
 - `/api/equity` must be **ACS-joined** (add `poverty_pct`, `zero_car_pct`,

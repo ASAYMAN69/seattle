@@ -47,4 +47,6 @@ export const actions = {
   setView: (view: ViewKey) => set({ view }),
   setLayer: (layer: LayerKey) => set({ layer }),
   selectGeoid: (geoid: string | null) => set({ selectedGeoid: geoid }),
+  /** Atomic restore (used by deep-link boot): one notification, one render. */
+  restore: (patch: Partial<AppState>) => set(patch),
 };

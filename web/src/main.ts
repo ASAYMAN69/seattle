@@ -12,10 +12,14 @@ import { api } from "./api/client";
 import { Drilldown } from "./components/drilldown";
 import { ExportView } from "./components/export-view";
 import { MapView } from "./components/map-view";
+import { Onboarding, shouldShowTour } from "./components/onboarding";
+import { StoryPanel } from "./components/story-panel";
 import { WhatIfView } from "./components/whatif";
 import { LAYERS, type LayerKey } from "./lib/colors";
 import { busMark, busSvg } from "./lib/mascot";
 import { paintSketchBoxes } from "./lib/sketch";
+import { pickStoryAnchor } from "./lib/story";
+import { deepLinkFromLocation, shareUrl, syncUrl } from "./lib/url";
 import { actions, getState, subscribe, type ViewKey } from "./state";
 import type {
   EquityFeature,
@@ -43,7 +47,10 @@ app.innerHTML = `
           <p class="dn-tagline">Who in Seattle is disconnected from opportunity?</p>
         </div>
       </div>
-      <div class="dn-meta dn-muted" id="city-summary"></div>
+      <div class="dn-header-actions">
+        <div class="dn-meta dn-muted" id="city-summary"></div>
+        <button class="dn-copy" id="copy-link" type="button" aria-live="polite">Copy link</button>
+      </div>
     </div>
   </header>
 
@@ -57,6 +64,7 @@ app.innerHTML = `
     <section class="dn-view dn-view-map is-active" data-view="map">
       <div id="map" class="dn-map" role="application" aria-label="Seattle transit equity map"></div>
       <div class="dn-layer-tabs sketch-card" role="group" aria-label="Analysis layer"></div>
+      <div id="story"></div>
       <div id="scrim" class="dn-scrim" aria-hidden="true"></div>
       <div id="drilldown"></div>
     </section>
@@ -131,18 +139,22 @@ function setBootLabel(message: string): void {
 function boot(): void {
   // MapLibre's worker script lives in web/public/ (copied from the package).
   setWorkerUrl("/maplibre-gl-worker.mjs");
+  // Deep-link restore (tolerant): unknown/malformed params keep defaults.
+  actions.restore(deepLinkFromLocation());
   buildNav();
   buildLayerTabs();
   updateNav();
   updateLayerTabs();
   scrim.addEventListener("click", () => actions.selectGeoid(null));
+  wireCopyLink();
 
-  // Stagger view content on switch (functional but unobtrusive).
+  // Stagger view content on switch; keep the shareable URL in sync.
   subscribe((next, prev) => {
     updateNav();
     updateLayerTabs();
     if (next.view !== prev.view) staggerView(next.view);
     updateScrim();
+    syncUrl(next);
   });
 
   // Show the branded animated boot immediately (before the first fetch).
@@ -172,6 +184,43 @@ function boot(): void {
   // Paint sketch outlines for the always-visible chrome.
   paintSketchBoxes();
   window.addEventListener("resize", () => paintSketchBoxes());
+}
+
+function wireCopyLink(): void {
+  const btn = document.getElementById("copy-link") as HTMLButtonElement | null;
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const url = shareUrl(getState());
+    const done = (): void => {
+      btn.textContent = "Copied!";
+      btn.classList.add("is-copied");
+      window.setTimeout(() => {
+        btn.textContent = "Copy link";
+        btn.classList.remove("is-copied");
+      }, 1400);
+    };
+    const fallback = (): void => {
+      // execCommand fallback for non-secure contexts.
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        /* clipboard unavailable — URL is still in the address bar */
+      }
+      ta.remove();
+      done();
+    };
+    if (navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(url).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
 }
 
 function buildLayerTabs(): void {
@@ -316,12 +365,34 @@ function mount(bundle: DataBundle): void {
     equityById,
   });
 
+  let storyPanel: StoryPanel | null = null;
+  const anchorFeature = pickStoryAnchor(bundle.equity);
+  if (anchorFeature) {
+    storyPanel = new StoryPanel({
+      container: document.getElementById("story")!,
+      feature: anchorFeature,
+      recommendations: bundle.recommendations.features,
+    });
+  }
+
   // Keep instances referenced (hinted GC safety for map GL contexts).
-  (app as unknown as { views?: unknown[] }).views = [mapView, drilldown, whatIf, exportView];
+  (app as unknown as { views?: unknown[] }).views = [
+    mapView,
+    drilldown,
+    whatIf,
+    exportView,
+    storyPanel,
+  ];
 
   renderCitySummary();
   paintSketchBoxes();
   updateScrim();
+  syncUrl(getState());
+
+  // First-visit guided tour (dismissible, persisted, keyboard-operable).
+  if (shouldShowTour()) {
+    new Onboarding().show();
+  }
 }
 
 boot();
