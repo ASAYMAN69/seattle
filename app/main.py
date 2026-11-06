@@ -35,19 +35,12 @@ st.set_page_config(page_title="Seattle Transit Equity Index", layout="wide")
 
 
 def _inject_styles() -> None:
-    """Apply the global stylesheet (app/styles.css) via st.html (preferred,
-    non-markdown raw-HTML path), falling back to unsafe markdown on older
-    Streamlit versions."""
-    css_path = Path(__file__).resolve().parent / "styles.css"
-    try:
-        css = css_path.read_text(encoding="utf-8")
-    except OSError:
-        return
-    block = f"<style>\n{css}\n</style>"
-    if hasattr(st, "html"):
-        st.html(block)
-    else:
-        st.markdown(block, unsafe_allow_html=True)
+    """Global styling is handled by `.streamlit/config.toml` ([theme]), which
+    is native and cannot leak source text into the page. Custom CSS injection
+    via st.markdown/st.html was removed (2026-11-06) after users reported the
+    stylesheet source rendering as visible text; do not reintroduce a
+    `<style>` block through an HTML-String path."""
+    return
 
 
 _inject_styles()
