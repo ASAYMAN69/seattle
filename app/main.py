@@ -35,13 +35,19 @@ st.set_page_config(page_title="Seattle Transit Equity Index", layout="wide")
 
 
 def _inject_styles() -> None:
-    """Apply the global stylesheet (app/styles.css) via st.markdown."""
+    """Apply the global stylesheet (app/styles.css) via st.html (preferred,
+    non-markdown raw-HTML path), falling back to unsafe markdown on older
+    Streamlit versions."""
     css_path = Path(__file__).resolve().parent / "styles.css"
     try:
         css = css_path.read_text(encoding="utf-8")
     except OSError:
         return
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    block = f"<style>\n{css}\n</style>"
+    if hasattr(st, "html"):
+        st.html(block)
+    else:
+        st.markdown(block, unsafe_allow_html=True)
 
 
 _inject_styles()
