@@ -74,3 +74,27 @@ Key real-data outputs on disk (data/prepared):
   **Dispatch — Picasso Task 004** (`agents/picasso/tasks/fix-double-borders-004.md`):
   singular border treatment per element (sketch for large chrome, CSS for small
   tiles; zero elements with both). Awaiting human launch + completion.
+- 2026-11-07: **Committed the full current stack (user-approved prereq for extra
+  features):** 3 commits — (1) Streamlit frontend refactor, (2) FastAPI + SPA
+  rebuild (incl. Task 003 sketch pass), (3) harness/CHECKLIST/context/README.
+  Working tree clean. User approved adding the 6 stretch features next.
+- 2026-11-07: **Dispatch for the 6 extra features** (user approved, time-of-day =
+  approximate): Picasso Task 005 (`agents/picasso/tasks/extra-features-005.md`)
+  — access story overlay, human story anchor, shareable deep-links, onboarding/
+  empty states, animated transitions (5 FE features, web/ only). Wizard Task 002
+  (`agents/wizard/tasks/time-of-day-002.md`) — approximate off-peak scenario in
+  the API (documented what-if, no recompute; api/ only). Parallel, disjoint
+  scope; API contract fixed in both briefs. Awaiting human launch.
+- 2026-11-07: **Committed both agents' work** (ff7d45f FE 004+005, 8b497cd BE 002;
+  verified: build green, API tests 21 passed, /api/scenarios live, off-peak
+  flagged + 422 on unknown). Updated CHECKLIST.md §6 all-done + §7 border fix
+  done; added §6B Wow Moments (narrator, before/after, isochrone pulse,
+  count-up/ring). **Dispatch — Picasso Task 006**
+  (`agents/picasso/tasks/wow-moments-006.md`, FE-only). Wizard parked (no
+  backend work for wow moments). Awaiting human launch.
+- 2026-11-07: **Picasso Task 006 DONE** (completion received; verified: build
+  green 27 modules, backend/dev/prod 200, narrator numbers match live API for
+  anchor 530330305012 + Route 160, before/after gain join + 40,813 honest,
+  pulse caption 'Illustrative coverage — sketch, not a true isochrone' in
+  DOM). Committed ff7d45f→95f840f (95f840f = wow moments). CHECKLIST §6B
+  marked done. Wizard unchanged (Task 002 still current).

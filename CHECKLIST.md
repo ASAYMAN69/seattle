@@ -116,19 +116,26 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 
 ## 6. Extra / stretch features (nice-to-have, only after MVP deploys)
 
-- [ ] Health / food / jobs access story overlay (narrative layer).
-- [ ] Time-of-day scenario toggle (weekday AM peak default vs off-peak).
-- [ ] Human story anchor: a specific low-income block group with a long real commute.
-- [ ] Publish-ready shareable links (deep-links to a block group / layer).
-- [ ] Lightweight onboarding / empty states / guided tour for judges.
-- [ ] Animated storytelling transitions between discovery steps (beyond current motion).
+- [x] Health / food / jobs access story overlay (narrative layer).
+- [x] Time-of-day scenario toggle (weekday AM peak default vs off-peak) — **approximate, documented what-if** (not a fresh routed network; see `api/scenarios.py`, `GET /api/scenarios`).
+- [x] Human story anchor: a specific low-income block group with a long real commute.
+- [x] Publish-ready shareable links (deep-links to a block group / layer).
+- [x] Lightweight onboarding / empty states / guided tour for judges.
+- [x] Animated storytelling transitions between discovery steps (beyond current motion).
+
+### 6B. Wow moments (judge 90-second flow — user-approved 2026-11-07)
+
+- [x] **Animated commute narrator:** sketch bus mascot narrates a real door-to-door trip for the anchor block group (wait/ride/walk breakdown from prepared fields only; qualitative where no travel-time field exists).
+- [x] **Before / After Seattle toggle:** "Today" vs "If top recommendations ship" — Equity Gap choropleth morphs, underserved fields brighten — visual proof for 40,813 affected residents.
+- [x] **Isochrone pulse:** click a block group → sketch-style 30-min walking+transit coverage draws outward; scales with selected access layer (Jobs / Healthcare / Food / Schools).
+- [x] City-summary count-up + equity-score ring gauge on the map header (motion escalation).
 
 ---
 
 ## 7. Design & UX polish
 
 - [x] Visual direction locked and applied consistently (civic, data-forward; current sketch-style pass).
-- [ ] Single-outline border treatment per element (no double-line overlap — see Task 004).
+- [x] Single-outline border treatment per element (no double-line overlap — see Task 004).
 - [x] Typography, spacing, color, focus states consistent across views.
 - [x] Motion: loading screen, drawer, pills, metric count-up, view transitions; reduced-motion honored.
 - [x] Responsive: desktop-first demo screen; ≤720px graceful (bottom-sheet drawer, stacked controls).
