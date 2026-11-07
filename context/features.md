@@ -21,7 +21,11 @@ Status legend: DONE · IN PROGRESS · PLANNED · DEFERRED
 - **3.1 App data loader + real equity map layers** (Need / Access / Equity Gap toggles).
 - **3.2 Neighborhood drilldown + Equity Report Card** (stats + recommendations).
 - **3.3 What-if frequency explorer** (slider on recommended corridors).
-- **3.4 Export view + visual polish** (native Streamlit theme).
+- **3.4 Export view + visual polish**.
+- *(Original Phase 3 was built as a Streamlit app; it is now retired/fallback.
+  All four features are carried over into the current TypeScript SPA in `web/`,
+  with the sketch-style polish, wow moments, and time-of-day scenario added on
+  top — see `decisions.md` + `progress.md`.)*
 
 ## Phase 4 — Submission (NEXT)
 - **4.1 Submission deck** (PPT) — planned next.

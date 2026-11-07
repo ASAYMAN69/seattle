@@ -4,7 +4,7 @@
 An interactive, data-driven **Transit Equity Index for Seattle** that reveals which
 communities are underserved by transit relative to their need, quantifies the gap,
 and recommends concrete service changes — delivered as a working web demo
-(Streamlit) plus a submission deck.
+(TypeScript SPA over a FastAPI backend) plus a submission deck.
 
 ## For whom
 - Judges / demo viewers (90-second clarity, map, wow moment, story)
