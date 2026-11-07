@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -67,6 +68,11 @@ class SPAStaticFiles(StaticFiles):
             raise
         if response.status_code == 404 and path != "index.html":
             return await super().get_response("index.html", scope)
+        # Cache hashed build assets immutably; never cache the HTML shell.
+        if path.startswith("assets/") and "/" in path and "." in path.rsplit("/", 1)[-1]:
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        elif path in ("index.html", ""):
+            response.headers["Cache-Control"] = "no-cache"
         return response
 
 
@@ -86,6 +92,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
         max_age=600,
     )
+    # gzip compress JSON/static/JS responses (big win: 1.1MB JS → ~300KB).
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
     app.include_router(router)
 
     if WEB_DIST.is_dir():
