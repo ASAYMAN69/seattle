@@ -9,6 +9,7 @@ import { gradeColor } from "../lib/colors";
 import { countUpTo } from "../lib/countup";
 import { escapeHtml, fmtCurrency, fmtInt, fmtPct } from "../lib/format";
 import { busSvg } from "../lib/mascot";
+import { buildNeedsCard } from "../lib/needs";
 import { paintSketchBoxes } from "../lib/sketch";
 import { pickStoryAnchor } from "../lib/story";
 import { actions, getState, subscribe } from "../state";
@@ -196,7 +197,7 @@ export class Drilldown {
 
     if (recs.length === 0) {
       recTitle.textContent = "What this area needs";
-      const needs = this.needsCard(p, feature);
+      const needs = buildNeedsCard(p, feature, this.recommendations);
       recSection.appendChild(needs);
     } else {
       recTitle.textContent = "Top recommendations";
@@ -220,93 +221,6 @@ export class Drilldown {
     for (const { el, value, format } of valueEls) {
       countUpTo(el, value, { format });
     }
-  }
-
-  /**
-   * Grade-driven "What this area needs" card (no corridor serves this
-   * block group): worst category grade → one-sentence need + nearest
-   * corridor by centroid distance (labelled nearest, never serving).
-   */
-  private needsCard(
-    p: EquityFeature["properties"],
-    feature: EquityFeature,
-  ): HTMLElement {
-    const wrap = document.createElement("div");
-    wrap.className = "dn-needs";
-    const cats: Array<[string, string | null]> = [
-      ["Jobs", p.jobs_grade],
-      ["Healthcare", p.healthcare_grade],
-      ["Schools", p.schools_grade],
-      ["Food", p.food_grade],
-    ];
-    const rank = (g: string | null): number =>
-      ({ A: 0, B: 1, C: 2, D: 3, F: 4 })[String(g ?? "").trim().toUpperCase()] ?? 5;
-    const worst = [...cats].sort((a, b) => rank(b[1]) - rank(a[1]))[0]!;
-    const worstLabel = `${worst[0]} ${String(worst[1] ?? "—").trim().toUpperCase() || "—"}`;
-    const needSentence =
-      worst[0] === "Jobs"
-        ? "Improving job access matters most here — the Jobs grade is the thinnest thread."
-        : `${worst[0]} access is the thinnest thread — the ${worstLabel} grade says it plainly.`;
-    const nearest = this.nearestCorridor(feature);
-    const nearHtml =
-      nearest && nearest.distKm != null
-        ? `<div class="dn-rec-pop">Nearest corridor (not serving here): ${escapeHtml(nearest.corridor)} · ≈ ${nearest.distKm.toFixed(1)} km from this block group’s center.</div>`
-        : nearest
-          ? `<div class="dn-rec-pop">Nearest corridor (not serving here): ${escapeHtml(nearest.corridor)}.</div>`
-          : "";
-    wrap.innerHTML =
-      `<span class="dn-mascot" aria-hidden="true">${busSvg({ size: 56 })}</span>` +
-      `<div class="dn-needs-lead">${escapeHtml(needSentence)}</div>` +
-      `<div class="dn-rec-pop">Overall grade ${escapeHtml(String(p.grade ?? "—").trim().toUpperCase() || "—")} · gap ${p.gap >= 0 ? "+" : "−"}${Math.abs(p.gap).toFixed(2)} (access − need).</div>` +
-      nearHtml;
-    return wrap;
-  }
-
-  /** Bounding-box centroid of the feature geometry (for distance rank). */
-  private featureCentroid(
-    f: EquityFeature,
-  ): { lat: number; lon: number } | null {
-    const geom = f.geometry;
-    if (!geom) return null;
-    let minLat = Infinity;
-    let maxLat = -Infinity;
-    let minLon = Infinity;
-    let maxLon = -Infinity;
-    const visit = (coords: unknown): void => {
-      if (!Array.isArray(coords)) return;
-      if (typeof coords[0] === "number" && typeof coords[1] === "number") {
-        const [lon, lat] = coords as [number, number];
-        minLon = Math.min(minLon, lon);
-        maxLon = Math.max(maxLon, lon);
-        minLat = Math.min(minLat, lat);
-        maxLat = Math.max(maxLat, lat);
-        return;
-      }
-      for (const c of coords) visit(c);
-    };
-    visit(geom.coordinates);
-    if (!Number.isFinite(minLat)) return null;
-    return { lat: (minLat + maxLat) / 2, lon: (minLon + maxLon) / 2 };
-  }
-
-  private nearestCorridor(feature: EquityFeature): {
-    corridor: string;
-    distKm: number | null;
-  } | null {
-    const c = this.featureCentroid(feature);
-    if (!c || this.recommendations.length === 0) return null;
-    let best: { corridor: string; dist: number } | null = null;
-    for (const f of this.recommendations) {
-      const props = f.properties as RecommendationProperties;
-      const { centroid_lat, centroid_lon } = props;
-      if (typeof centroid_lat !== "number" || typeof centroid_lon !== "number") continue;
-      const dLat = (centroid_lat - c.lat) * 111;
-      const dLon = (centroid_lon - c.lon) * 111 * Math.cos((c.lat * Math.PI) / 180);
-      const dist = Math.hypot(dLat, dLon);
-      if (!best || dist < best.dist) best = { corridor: props.corridor, dist };
-    }
-    if (!best) return null;
-    return { corridor: best.corridor, distKm: best.dist };
   }
 
   /** Swap the feature map (time-of-day refetch) and re-render. */

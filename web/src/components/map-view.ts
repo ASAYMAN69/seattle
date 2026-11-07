@@ -5,32 +5,34 @@
  *  - click-to-select block groups (drilldown)
  *  - adaptive legend overlay (sequential/diverging/grade)
  * Color palettes preserved from the Streamlit app (colorblind-safe).
+ *
+ * Paint/expression/legend helpers live in lib/map-style.ts (Task 010 split).
  */
 import {
   LngLatBounds,
   Map as MapLibreMap,
   NavigationControl,
-  type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   accessScoreForLayer,
-  GRADE_COLORS,
-  LAYERS,
   MAP_FILL_BASE,
   MAP_LINE,
-  MISSING_FILL,
   layerByKey,
-  type LayerConfig,
   type LayerKey,
 } from "../lib/colors";
-import { afterAccess } from "../lib/before-after";
+import {
+  BG,
+  buildFillPaint,
+  changedFilterExpression,
+  effectiveConfig,
+  equityWithAfter,
+  prefersReducedMotion,
+  renderLegendInto,
+} from "../lib/map-style";
 import { paintSketchBoxes } from "../lib/sketch";
 import { actions, getState, subscribe } from "../state";
 import type { EquityFeatureCollection } from "../types";
-
-/* Paper-tinted map background; data layers (fills, selection) untouched. */
-const BG = "#f2ece0";
 
 interface MapViewOptions {
   container: HTMLElement;
@@ -39,11 +41,6 @@ interface MapViewOptions {
   /** Per-block-group after-access gains (Before/After model). */
   gains?: Map<string, number>;
   onReady?: () => void;
-}
-
-interface FillPaint {
-  "fill-color": ExpressionSpecification;
-  "fill-opacity": number;
 }
 
 export class MapView {
@@ -150,7 +147,7 @@ export class MapView {
     });
     this.map.addSource("equity", {
       type: "geojson",
-      data: this.equityWithAfter() as unknown as GeoJSON.GeoJSON,
+      data: equityWithAfter(this.equity, this.gains) as unknown as GeoJSON.GeoJSON,
     });
 
     this.map.addLayer({
@@ -176,14 +173,14 @@ export class MapView {
       id: "analysis-fill",
       type: "fill",
       source: "equity",
-      paint: this.fillPaint(this.activeLayer),
+      paint: buildFillPaint(effectiveConfig(this.activeLayer, this.activeMode, this.gains, this.equity)),
     });
     // After-mode dimmer: non-changed polygons fade so the shift reads.
     this.map.addLayer({
       id: "after-dimmer",
       type: "fill",
       source: "equity",
-      filter: this.changedFilter(false),
+      filter: changedFilterExpression(this.gains, false),
       paint: { "fill-color": "#f6f0e4", "fill-opacity": 0 },
     });
     // After-mode halo: strong outline on the changed polygons only.
@@ -191,7 +188,7 @@ export class MapView {
       id: "after-halo",
       type: "line",
       source: "equity",
-      filter: this.changedFilter(true),
+      filter: changedFilterExpression(this.gains, true),
       paint: { "line-color": "#f0f7ff", "line-opacity": 0, "line-width": 3 },
     });
     this.map.addLayer({
@@ -217,7 +214,10 @@ export class MapView {
     });
 
     this.fitToData();
-    this.renderLegend(this.activeLayer);
+    renderLegendInto(this.legendEl, this.activeLayer, this.activeMode, {
+      gains: this.gains,
+      equity: this.equity,
+    });
   }
 
   private fitToData(): void {
@@ -245,11 +245,14 @@ export class MapView {
   setLayer(layer: LayerKey): void {
     this.activeLayer = layer;
     if (this.map.isStyleLoaded()) {
-      const paint = this.fillPaint(layer, this.activeMode);
+      const paint = buildFillPaint(effectiveConfig(layer, this.activeMode, this.gains, this.equity));
       this.map.setPaintProperty("analysis-fill", "fill-color", paint["fill-color"]);
       this.map.setPaintProperty("analysis-fill", "fill-opacity", paint["fill-opacity"]);
     }
-    this.renderLegend(layer, this.activeMode);
+    renderLegendInto(this.legendEl, layer, this.activeMode, {
+      gains: this.gains,
+      equity: this.equity,
+    });
   }
 
   /**
@@ -262,7 +265,10 @@ export class MapView {
   setMode(mode: "today" | "after"): void {
     this.activeMode = mode;
     // Legend is style-independent (always render — mirrors setLayer).
-    this.renderLegend(this.activeLayer, mode);
+    renderLegendInto(this.legendEl, this.activeLayer, mode, {
+      gains: this.gains,
+      equity: this.equity,
+    });
     if (!this.map.isStyleLoaded()) return;
     // Halo + dimmer visibility (transition 150 ms, reduced-motion safe).
     const haloOp = mode === "after" ? 0.95 : 0;
@@ -275,7 +281,7 @@ export class MapView {
     } catch {
       /* best-effort — legend/paint already applied */
     }
-    const paint = this.fillPaint(this.activeLayer, mode);
+    const paint = buildFillPaint(effectiveConfig(this.activeLayer, mode, this.gains, this.equity));
     if (!prefersReducedMotion()) {
       this.map.setPaintProperty("analysis-fill", "fill-opacity", 0.35);
       window.setTimeout(() => {
@@ -293,46 +299,6 @@ export class MapView {
     this.map.setFilter("selection-line", ["==", ["get", "geoid"], geoid ?? ""]);
   }
 
-  private fillPaint(layer: LayerKey, mode: "today" | "after" = this.activeMode): FillPaint {
-    const cfg = this.effectiveConfig(layer, mode);
-    return {
-      "fill-color": buildColorExpression(cfg),
-      "fill-opacity": cfg.kind === "grade" ? 0.7 : 0.65,
-    };
-  }
-
-  /**
-   * Column swapped to its `*_after` twin in After mode (gap/access only).
-   * Gap in After rescales the diverging domain to the changed range so
-   * the small shift reads (honestly labelled "estimated"; the full
-   * today domain is [-0.39, 0.79]).
-   */
-  private effectiveConfig(layer: LayerKey, mode: "today" | "after"): LayerConfig {
-    const cfg = layerByKey(layer);
-    if (mode !== "after") return cfg;
-    if (cfg.column === "gap") {
-      const range = this.changedGapAfterRange();
-      return { ...cfg, column: "gap_after", domain: range ?? cfg.domain };
-    }
-    if (cfg.column === "access_overall") return { ...cfg, column: "access_after" };
-    return cfg;
-  }
-
-  private changedGapAfterRange(): [number, number] | null {
-    if (this.gains.size === 0) return null;
-    let lo = Number.POSITIVE_INFINITY;
-    let hi = Number.NEGATIVE_INFINITY;
-    for (const f of this.equity.features) {
-      const g = this.gains.get(String(f.properties.geoid));
-      if (g == null) continue;
-      const v = afterAccess(f.properties.access_overall, g) - f.properties.need_index;
-      lo = Math.min(lo, v);
-      hi = Math.max(hi, v);
-    }
-    if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo < 0.05) return null;
-    return [Number(lo.toFixed(2)), Number(hi.toFixed(2))];
-  }
-
   /**
    * Swap equity source (time-of-day refetch). Re-augments After fields
    * (gains are scenario-independent), refreshes paint + legend, keeps
@@ -344,82 +310,13 @@ export class MapView {
     const src = this.map.getSource("equity") as unknown as {
       setData: (d: unknown) => void;
     };
-    src.setData(this.equityWithAfter());
-    const paint = this.fillPaint(this.activeLayer, this.activeMode);
+    src.setData(equityWithAfter(this.equity, this.gains));
+    const paint = buildFillPaint(effectiveConfig(this.activeLayer, this.activeMode, this.gains, this.equity));
     this.map.setPaintProperty("analysis-fill", "fill-color", paint["fill-color"]);
-    this.renderLegend(this.activeLayer, this.activeMode);
-  }
-
-  /** Filter expression for changed-only / unchanged-only layers. */
-  private changedFilter(changed: boolean): ExpressionSpecification {
-    const ids = [...this.gains.keys()];
-    if (changed) {
-      return ["in", ["get", "geoid"], ["literal", ids]] as unknown as ExpressionSpecification;
-    }
-    return ["all", ["has", "geoid"], ["!", ["in", ["get", "geoid"], ["literal", ids]]]] as unknown as ExpressionSpecification;
-  }
-
-  /** Equity features augmented with `gap_after` / `access_after` (clone). */
-  private equityWithAfter(): EquityFeatureCollection {
-    if (this.gains.size === 0) return this.equity;
-    return {
-      type: "FeatureCollection",
-      features: this.equity.features.map((f) => {
-        const p = f.properties;
-        const accessAfter = afterAccess(p.access_overall, this.gains.get(String(p.geoid)));
-        return {
-          ...f,
-          properties: {
-            ...p,
-            access_after: accessAfter,
-            gap_after: accessAfter - p.need_index,
-          },
-        };
-      }),
-    };
-  }
-
-  private renderLegend(key: LayerKey, mode: "today" | "after" = this.activeMode): void {
-    const cfg = this.effectiveConfig(key, mode);
-    const inner = document.createElement("div");
-    inner.className = "dn-map-legend-inner";
-
-    const title = document.createElement("div");
-    title.className = "dn-map-legend-title";
-    title.textContent = cfg.label;
-    inner.appendChild(title);
-
-    if (cfg.kind === "grade") {
-      const grid = document.createElement("div");
-      grid.className = "dn-legend-grade-grid";
-      for (const [grade, color] of Object.entries(GRADE_COLORS)) {
-        const row = document.createElement("div");
-        row.className = "dn-legend-grade-row";
-        row.innerHTML = `<span class="dn-legend-swatch" style="background:${color}"></span><span>${grade}</span>`;
-        grid.appendChild(row);
-      }
-      inner.appendChild(grid);
-    } else {
-      const [lo, hi] = cfg.domain!;
-      const labels =
-        cfg.kind === "diverging"
-          ? `<span>${lo.toFixed(2)} · underserved</span><span>0</span><span>${hi.toFixed(2)} · better served</span>`
-          : `<span>${lo.toFixed(2)}</span><span>${hi.toFixed(2)}</span>`;
-      inner.innerHTML += `
-        <div class="dn-legend-gradient" style="background:${gradientCss(cfg.ramp!)}" aria-hidden="true"></div>
-        <div class="dn-legend-labels">${labels}</div>`;
-    }
-
-    const note = document.createElement("div");
-    note.className = "dn-map-legend-note";
-    note.textContent =
-      mode === "after"
-        ? `${cfg.legend}. After (estimated): access + corridor gain, no re-routing. Scale fits the moving block groups.`
-        : cfg.legend;
-    inner.appendChild(note);
-
-    this.legendEl.replaceChildren(inner);
-    paintSketchBoxes(this.legendEl);
+    renderLegendInto(this.legendEl, this.activeLayer, this.activeMode, {
+      gains: this.gains,
+      equity: this.equity,
+    });
   }
 
   /**
@@ -478,70 +375,4 @@ export class MapView {
   getMap(): MapLibreMap {
     return this.map;
   }
-}
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
-
-function gradientCss(ramp: string[]): string {
-  const step = 100 / (ramp.length - 1);
-  const stops = ramp.map((c, i) => `${c} ${Math.round(i * step)}%`);
-  return `linear-gradient(to right, ${stops.join(", ")})`;
-}
-
-function buildColorExpression(cfg: LayerConfig): ExpressionSpecification {
-  const get = ["get", cfg.column] as ExpressionSpecification;
-
-  if (cfg.kind === "grade") {
-    const match: unknown[] = ["match", get];
-    for (const [grade, color] of Object.entries(GRADE_COLORS)) {
-      match.push(grade, color);
-    }
-    match.push(MISSING_FILL); // default (unknown / missing)
-    return match as ExpressionSpecification;
-  }
-
-  // Sequential: equal-spaced stops across the domain.
-  // Diverging: explicit stops anchored at 0 (red — underserved ↔ blue — served).
-  const stops: Array<[number, string]> = [];
-  if (cfg.kind === "diverging") {
-    const gapStops: Array<[number, string]> = [
-      [-0.39, "#b2182b"],
-      [-0.25, "#d6604d"],
-      [-0.12, "#f4a582"],
-      [-0.04, "#fddbc7"],
-      [0, "#f7f7f7"],
-      [0.15, "#d1e5f0"],
-      [0.35, "#92c5de"],
-      [0.55, "#4393c3"],
-      [0.79, "#2166ac"],
-    ];
-    stops.push(...gapStops);
-  } else {
-    const [lo, hi] = cfg.domain!;
-    const n = cfg.ramp!.length;
-    for (let i = 0; i < n; i++) {
-      const v = lo + ((hi - lo) * i) / (n - 1);
-      stops.push([Number(v.toFixed(4)), cfg.ramp![i]!]);
-    }
-  }
-
-  const interpolate = [
-    "interpolate",
-    ["linear"],
-    get,
-    ...stops.flat(),
-  ] as unknown as ExpressionSpecification;
-
-  // Missing/null value → neutral fill (was nan_fill_color).
-  return [
-    "case",
-    ["all", ["has", cfg.column], ["!=", get, null]],
-    interpolate,
-    MISSING_FILL,
-  ] as unknown as ExpressionSpecification;
 }

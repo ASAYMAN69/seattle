@@ -4,19 +4,9 @@
  * plus a highlight map (corridor + served block groups).
  * Sketch theme: ink-soft controls, amber callout, count-up metrics on
  * corridor change (instant on slider drag). Interpolation model untouched.
+ *
+ * The highlight map lives in whatif-map.ts (Task 010 modularization).
  */
-import {
-  LngLatBounds,
-  Map as MapLibreMap,
-  type GeoJSONSource,
-} from "maplibre-gl";
-import {
-  CORRIDOR_COLOR,
-  MAP_FILL_BASE,
-  MAP_LINE,
-  SERVED_FILL,
-  SERVED_OUTLINE,
-} from "../lib/colors";
 import { countUpTo } from "../lib/countup";
 import { escapeHtml, fmtInt, fmtMinutes, fmtPp } from "../lib/format";
 import {
@@ -36,6 +26,7 @@ import type {
   RecommendationFeatureCollection,
   SensitivityRecord,
 } from "../types";
+import { WhatIfMapView } from "./whatif-map";
 
 interface WhatIfOptions {
   container: HTMLElement;
@@ -44,10 +35,6 @@ interface WhatIfOptions {
   equity: EquityFeatureCollection;
   boundary: GeoJSON.FeatureCollection;
 }
-
-/* Paper-tinted map background to sit inside the sketch theme.
- * Data layers (served/corridor paints) are untouched. */
-const BG = "#f2ece0";
 
 export class WhatIfView {
   private container: HTMLElement;
@@ -61,8 +48,7 @@ export class WhatIfView {
   private sliderValue: HTMLElement;
   private callout: HTMLElement;
   private metrics: HTMLElement;
-  private mapEl: HTMLElement;
-  private map: MapLibreMap | null = null;
+  private minimap: WhatIfMapView;
 
   private selectedRouteId: string | null = null;
   private selectedMultiplier = FREQ_DEFAULT;
@@ -99,7 +85,12 @@ export class WhatIfView {
     this.sliderValue = this.container.querySelector(".dn-slider-output") as HTMLElement;
     this.callout = this.container.querySelector(".dn-callout") as HTMLElement;
     this.metrics = this.container.querySelector(".dn-metric-grid") as HTMLElement;
-    this.mapEl = this.container.querySelector(".dn-minimap") as HTMLElement;
+    this.minimap = new WhatIfMapView({
+      container: this.container.querySelector(".dn-minimap") as HTMLElement,
+      boundary: this.boundary,
+      equity: this.equity,
+      recommendations: this.recommendations,
+    });
 
     this.populateCorridors();
     this.bindEvents();
@@ -151,7 +142,7 @@ export class WhatIfView {
     this.callout.hidden = false;
     this.callout.textContent = proj.action;
     this.renderMetrics(proj, shouldAnimate);
-    this.renderMap(proj);
+    this.minimap.update(proj);
     paintSketchBoxes(this.container);
   }
 
@@ -183,129 +174,6 @@ export class WhatIfView {
       }
     }
   }
-
-  private renderMap(proj: WhatIfProjection): void {
-    if (this.map) {
-      this.updateMapSources(proj);
-      return;
-    }
-
-    this.map = new MapLibreMap({
-      container: this.mapEl,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: "raster",
-            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-            tileSize: 256,
-            attribution: "© OpenStreetMap contributors",
-          },
-        },
-        layers: [
-          { id: "background", type: "background", paint: { "background-color": BG } },
-          { id: "osm", type: "raster", source: "osm", paint: { "raster-opacity": 0.6 } },
-        ],
-      },
-      center: [-122.32, 47.6],
-      zoom: 10.6,
-      attributionControl: { compact: true },
-    });
-
-    this.map.on("load", () => {
-      this.map!.addSource("boundary", {
-        type: "geojson",
-        data: this.boundary as unknown as GeoJSON.GeoJSON,
-      });
-      this.map!.addLayer({
-        id: "boundary-fill",
-        type: "fill",
-        source: "boundary",
-        paint: { "fill-color": MAP_FILL_BASE, "fill-opacity": 0.15 },
-      });
-      this.map!.addLayer({
-        id: "boundary-line",
-        type: "line",
-        source: "boundary",
-        paint: { "line-color": MAP_LINE, "line-width": 2, "line-opacity": 0.9 },
-      });
-      this.map!.addSource("served", { type: "geojson", data: emptyFC() });
-      this.map!.addLayer({
-        id: "served-fill",
-        type: "fill",
-        source: "served",
-        paint: { "fill-color": SERVED_FILL, "fill-opacity": 0.28 },
-      });
-      this.map!.addLayer({
-        id: "served-line",
-        type: "line",
-        source: "served",
-        paint: { "line-color": SERVED_OUTLINE, "line-width": 2 },
-      });
-      this.map!.addSource("corridor", { type: "geojson", data: emptyFC() });
-      this.map!.addLayer({
-        id: "corridor-line",
-        type: "line",
-        source: "corridor",
-        paint: { "line-color": CORRIDOR_COLOR, "line-width": 4, "line-opacity": 0.95 },
-      });
-
-      this.fitBoundary();
-      this.updateMapSources(proj);
-    });
-  }
-
-  private updateMapSources(proj: WhatIfProjection): void {
-    if (!this.map) return;
-
-    // Served block groups for this recommendation.
-    const rec = this.recommendations.features.find(
-      (f) => routeKey(f.properties.route_id) === routeKey(proj.route_id),
-    );
-    const geoids = rec ? rec.properties.geoids ?? [] : [];
-    const geoidSet = new Set(geoids);
-    const servedFeatures = this.equity.features.filter((f) => geoidSet.has(f.properties.geoid));
-    const servedFC: GeoJSON.FeatureCollection = {
-      type: "FeatureCollection",
-      features: servedFeatures as unknown as GeoJSON.Feature[],
-    };
-    (this.map.getSource("served") as GeoJSONSource).setData(servedFC);
-
-    // Corridor geometry (LineString) — coverage-gap row has none.
-    if (rec?.geometry) {
-      (this.map.getSource("corridor") as GeoJSONSource).setData({
-        type: "FeatureCollection",
-        features: [rec as unknown as GeoJSON.Feature],
-      });
-    } else {
-      (this.map.getSource("corridor") as GeoJSONSource).setData(emptyFC());
-    }
-  }
-
-  private fitBoundary(): void {
-    const bounds = new LngLatBounds();
-    const fc = this.boundary;
-    for (const feature of fc.features) {
-      const geom = feature.geometry;
-      if (!geom) continue;
-      if (geom.type === "Polygon") {
-        for (const ring of geom.coordinates as number[][][]) {
-          for (const pt of ring) bounds.extend([pt[0]!, pt[1]!]);
-        }
-      } else if (geom.type === "MultiPolygon") {
-        for (const poly of geom.coordinates as number[][][][]) {
-          for (const ring of poly) for (const pt of ring) bounds.extend([pt[0]!, pt[1]!]);
-        }
-      }
-    }
-    if (!bounds.isEmpty()) {
-      this.map!.fitBounds(bounds, { padding: 16, duration: 0 });
-    }
-  }
-}
-
-function emptyFC(): GeoJSON.FeatureCollection {
-  return { type: "FeatureCollection", features: [] };
 }
 
 export { REFERENCE_MULTIPLIER };

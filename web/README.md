@@ -145,16 +145,27 @@ a fabricated serving corridor.
 ```
 web/
   index.html
-  vite.config.ts            # dev proxy /api → localhost:8000
+  vite.config.ts            # dev/preview proxy /api → localhost:8000
   tsconfig.json
   src/
-    main.ts                 # shell + bootstrap
+    main.ts                 # entry — imports boot() only
+    shell.ts                # app shell markup (header/nav/views)
+    boot.ts                 # boot/load/mount + boot scene UI
+    nav.ts                  # view switching, scrim, stagger animation
+    layers.ts               # layer pill tabs (map controls)
+    scenario.ts             # time-of-day + Before/After controls, banner, refresh, delta readout
+    header.ts               # city summary, count-up, copy-link
+    view-refs.ts            # shared mounted-view references (boot ↔ scenario)
     style.css               # design system (civic, colorblind-safe)
     types.ts                # API payload types
     api/client.ts           # typed fetch client + fallbacks
-    lib/format.ts, colors.ts, interpolation.ts, csv.ts
+    lib/format.ts, colors.ts, interpolation.ts, csv.ts, countup.ts,
+        mascot.ts, narrator.ts, sketch.ts, story.ts, url.ts,
+        before-after.ts, map-style.ts, needs.ts, export-format.ts
     state.ts                # tiny pub/sub store
-    components/map-view.ts, drilldown.ts, whatif.ts, export-view.ts
+    components/map-view.ts, drilldown.ts, whatif.ts, whatif-map.ts,
+        export-view.ts, export-charts.ts, export-snapshot.ts,
+        story-panel.ts, onboarding.ts
   scripts/
     dev-api.mjs             # dev-only mock API (real prepared data)
     gen-dev-mock.py         # parquet → JSON mocks
