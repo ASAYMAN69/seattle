@@ -159,7 +159,8 @@ button {
 /* Header + nav                                                        */
 /* ================================================================== */
 
-/* Navbar: one cohesive sticky bar (brand | segmented tabs | actions). */
+/* Navbar: one cohesive sticky bar (brand | segmented tabs | actions)
+   + a slim stat ribbon below. Grid keeps 3 zones from colliding. */
 .dn-header {
   background: var(--paper-2);
   border-bottom: 1.5px solid var(--line-soft);
@@ -170,12 +171,32 @@ button {
 
 .dn-header-inner {
   max-width: 1240px;
+  min-height: 64px;
   margin: 0 auto;
-  padding: 10px 24px;
+  padding: 8px 24px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+}
+
+.dn-ribbon {
+  border-top: 1px solid var(--line-soft);
+  padding: 6px 24px;
+}
+
+.dn-ribbon .dn-meta {
+  max-width: 1240px;
+  margin: 0 auto;
+  text-align: left;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dn-ribbon .dn-meta::-webkit-scrollbar {
+  display: none;
 }
 
 .dn-brand {
@@ -357,17 +378,20 @@ button {
   color: var(--muted);
 }
 
-/* Map controls share the navbar language (same pill scale, curve, and
-   paper surface) and stack as one column so they never overlap. */
+/* Map controls: one compact cluster card (≤380px) so the map stays hero.
+   Outer card is the single Rough outline (Task 004); inner groups are plain. */
 .dn-map-controls {
   position: absolute;
   top: 16px;
   left: 16px;
   z-index: 20;
+  width: min(380px, calc(100% - 32px));
+  background: var(--paper-2);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-lift);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-width: calc(100% - 32px);
+  gap: 12px;
 }
 
 .dn-mapctl-label {
@@ -380,18 +404,26 @@ button {
   margin-bottom: 5px;
 }
 
-.dn-layer-tabs {
-  background: var(--paper-2);
-  border-radius: var(--r-a);
-  padding: 8px 10px;
-  box-shadow: var(--shadow-lift);
-  max-width: 100%;
+.dn-ctl-section {
+  min-width: 0;
+}
+
+.dn-ctl-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dn-ctl-half {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .dn-layer-tabs-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .dn-layer-pill {
@@ -987,6 +1019,78 @@ button {
   font-weight: 700;
 }
 
+.dn-export-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dn-export-count {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.dn-row-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Export charts — in-page insight, not part of the CSV. */
+.dn-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dn-chart-card {
+  background: var(--paper-2);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-lift);
+}
+
+.dn-chart-card h3 {
+  font-family: var(--font-hand);
+  font-size: 1.02rem;
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+
+.dn-chart-sub {
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.dn-chart-card svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.dn-chart-axis {
+  font-size: 0.72rem;
+  fill: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.dn-chart-val {
+  font-size: 0.72rem;
+  fill: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .dn-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dn-table-wrap {
   background: var(--paper-2);
   border-radius: var(--r-a);
@@ -1169,7 +1273,7 @@ button {
   color: var(--accent);
 }
 
-/* Story anchor card (map bottom-left) */
+/* Story anchor card (map bottom-left) — collapsed 2-line peek by default. */
 .dn-story {
   position: absolute;
   left: 16px;
@@ -1179,6 +1283,21 @@ button {
   background: var(--paper-2);
   padding: 14px 16px;
   animation: dnFadeUp 240ms var(--ease-out) both;
+}
+
+.dn-story-stat {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin: 2px 0 8px;
+}
+
+.dn-story-full {
+  margin-top: 4px;
+}
+
+.dn-story.is-expanded {
+  width: min(380px, calc(100% - 32px));
 }
 
 .dn-story-head {
@@ -1412,11 +1531,12 @@ button {
   color: var(--ink);
 }
 
-/* Before / After segmented toggle (stacked under layer tabs). */
-.dn-beforeafter {
-  background: var(--paper-2);
-  padding: 8px 10px;
-  box-shadow: var(--shadow-lift);
+/* Before / After lives inside the controls cluster as a plain pair. */
+.dn-beforeafter-row .dn-ba-btn,
+.dn-beforeafter-row .tod-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .dn-beforeafter-row {
@@ -1620,11 +1740,23 @@ button {
 .dn-scenario-banner {
   background: var(--accent-soft);
   border-radius: var(--r-b);
-  padding: 10px 12px;
-  font-size: 0.8rem;
+  padding: 8px 10px;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--ink);
-  max-width: 460px;
+  line-height: 1.4;
+}
+
+.dn-delta-readout {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-pill);
+  padding: 4px 10px 2px;
+  font-size: 0.76rem;
+  font-family: var(--font-mono);
+  color: var(--ink);
+  background: var(--paper-2);
 }
 
 .dn-delta-readout {
@@ -1850,15 +1982,19 @@ button {
   }
 
   /* Stack story above the legend (legend ~90px tall with note hidden).
-     Clamp height so the map stays visible on small screens. */
+     Peek stays short so the map stays visible on small screens. */
   .dn-story {
     left: 10px;
     right: 10px;
     bottom: 112px;
     width: auto;
     padding: 12px 14px;
-    max-height: 42dvh;
+    max-height: 25dvh;
     overflow-y: auto;
+  }
+
+  .dn-story.is-expanded {
+    max-height: 68dvh;
   }
 
   .dn-tour-root {

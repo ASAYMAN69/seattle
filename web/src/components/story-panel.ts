@@ -8,6 +8,7 @@ import { busSvg } from "../lib/mascot";
 import { buildNarratorSteps } from "../lib/narrator";
 import { paintSketch } from "../lib/sketch";
 import { actions, getState } from "../state";
+import { fmtCurrency, fmtInt, fmtPct } from "../lib/format";
 import { storyNarrative, toStoryAnchor } from "../lib/story";
 import type {
   EquityFeature,
@@ -48,17 +49,23 @@ export class StoryPanel {
 
     this.container.innerHTML = `
       <div class="dn-story-head">
-        <span class="dn-story-mascot" aria-hidden="true">${busSvg({ size: 34 })}</span>
+        <span class="dn-story-mascot" aria-hidden="true">${busSvg({ size: 30 })}</span>
         <div class="dn-story-head-text">
           <div class="dn-story-kicker">A real neighborhood</div>
           <div class="dn-story-title">Meet block group ${anchor.geoid}</div>
         </div>
         <button class="dn-story-close" type="button" aria-label="Dismiss story card">×</button>
       </div>
-      <p class="dn-story-text">${storyNarrative(anchor, nRecs)}</p>
+      <div class="dn-story-stat">${fmtInt(anchor.population)} people · ${fmtPct(anchor.povertyPct)} poverty · ${fmtCurrency(anchor.medianIncome)} income</div>
       <div class="dn-story-actions">
-        <button class="dn-btn is-secondary dn-narrate-toggle" type="button" aria-expanded="false">Hear the trip</button>
-        <button class="dn-btn dn-story-cta" type="button">See its report card</button>
+        <button class="dn-btn dn-story-cta" type="button">Expand story</button>
+      </div>
+      <div class="dn-story-full" hidden>
+        <p class="dn-story-text">${storyNarrative(anchor, nRecs)}</p>
+        <div class="dn-story-actions">
+          <button class="dn-btn is-secondary dn-narrate-toggle" type="button" aria-expanded="false">Hear the trip</button>
+          <button class="dn-btn dn-story-cta dn-story-open" type="button">See its report card</button>
+        </div>
       </div>
       <div class="dn-narrate" hidden>
         <div class="dn-narrate-scene" aria-hidden="true">
@@ -89,8 +96,23 @@ export class StoryPanel {
       }
     });
 
-    const cta = this.container.querySelector<HTMLButtonElement>(".dn-story-cta")!;
-    cta.addEventListener("click", () => {
+    const expandBtn = this.container.querySelector<HTMLButtonElement>(".dn-story-cta")!;
+    expandBtn.addEventListener("click", () => {
+      const full = this.container.querySelector<HTMLElement>(".dn-story-full")!;
+      const open = full.hidden;
+      full.hidden = !open;
+      expandBtn.textContent = open ? "Collapse story" : "Expand story";
+      expandBtn.setAttribute("aria-expanded", String(open));
+      if (open) {
+        // Keep the peek stat visible as context; body is progressive.
+        this.container.classList.add("is-expanded");
+      } else {
+        this.container.classList.remove("is-expanded");
+      }
+    });
+
+    const openBtn = this.container.querySelector<HTMLButtonElement>(".dn-story-open")!;
+    openBtn.addEventListener("click", () => {
       actions.selectGeoid(anchor.geoid);
       if (getState().view !== "map") actions.setView("map");
     });

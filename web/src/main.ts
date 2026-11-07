@@ -43,10 +43,7 @@ app.innerHTML = `
     <div class="dn-header-inner">
       <div class="dn-brand">
         <span class="dn-brand-mark" aria-hidden="true">${busMark({ size: 32 })}</span>
-        <div>
-          <h1 class="dn-title">Seattle Transit Equity Index</h1>
-          <p class="dn-tagline">Who’s disconnected from opportunity?</p>
-        </div>
+        <h1 class="dn-title">Seattle Transit Equity Index</h1>
       </div>
       <nav class="dn-nav" aria-label="Views">
         <button class="dn-navbtn" data-view="map" type="button" aria-current="page">Map explorer</button>
@@ -54,36 +51,40 @@ app.innerHTML = `
         <button class="dn-navbtn" data-view="export" type="button">Export</button>
       </nav>
       <div class="dn-header-actions">
-        <div class="dn-meta dn-muted" id="city-summary"></div>
         <button class="dn-copy" id="copy-link" type="button" aria-live="polite">Copy link</button>
       </div>
+    </div>
+    <div class="dn-ribbon">
+      <div class="dn-meta dn-muted" id="city-summary"></div>
     </div>
   </header>
 
   <main class="dn-main">
     <section class="dn-view dn-view-map is-active" data-view="map">
       <div id="map" class="dn-map" role="application" aria-label="Seattle transit equity map"></div>
-      <div class="dn-map-controls">
-        <div class="dn-timeofday sketch-card" role="group" aria-label="Time of day scenario">
-          <span class="dn-mapctl-label" aria-hidden="true">Scenario</span>
-          <div class="dn-beforeafter-row">
-            <button class="tod-btn is-active" data-tod="am_peak" type="button" aria-pressed="true">AM peak</button>
-            <button class="tod-btn" data-tod="off_peak" type="button" aria-pressed="false">Off-peak ✦</button>
-          </div>
-        </div>
-        <div class="dn-layer-tabs sketch-card">
-          <span class="dn-mapctl-label" aria-hidden="true">Area layer</span>
+      <div class="dn-map-controls sketch-card">
+        <div class="dn-ctl-section">
+          <span class="dn-mapctl-label">Area layer</span>
           <div class="dn-layer-tabs-row" role="group" aria-label="Area layer"></div>
         </div>
-        <div class="dn-beforeafter sketch-card" role="group" aria-label="Before or after recommendations">
-          <span class="dn-mapctl-label" aria-hidden="true">Before / after</span>
-          <div class="dn-beforeafter-row">
-            <button class="dn-ba-btn is-active" data-mode="today" type="button" aria-pressed="true">Today</button>
-            <button class="dn-ba-btn" data-mode="after" type="button" aria-pressed="false">If recommendations ship</button>
+        <div class="dn-ctl-pair">
+          <div class="dn-ctl-half" role="group" aria-label="Time of day scenario">
+            <span class="dn-mapctl-label" aria-hidden="true">Scenario</span>
+            <div class="dn-beforeafter-row">
+              <button class="tod-btn is-active" data-tod="am_peak" type="button" aria-pressed="true">AM peak</button>
+              <button class="tod-btn" data-tod="off_peak" type="button" aria-pressed="false">Off-peak ✦</button>
+            </div>
           </div>
-          <div class="dn-delta-readout" id="delta-readout" hidden></div>
+          <div class="dn-ctl-half" role="group" aria-label="Before or after recommendations">
+            <span class="dn-mapctl-label" aria-hidden="true">Before / after</span>
+            <div class="dn-beforeafter-row">
+              <button class="dn-ba-btn is-active" data-mode="today" type="button" aria-pressed="true">Today</button>
+              <button class="dn-ba-btn" data-mode="after" type="button" aria-pressed="false">If recommendations ship</button>
+            </div>
+          </div>
         </div>
         <div class="dn-scenario-banner" id="scenario-banner" role="status" hidden></div>
+        <div class="dn-delta-readout" id="delta-readout" hidden></div>
       </div>
       <div id="story"></div>
       <div id="scrim" class="dn-scrim" aria-hidden="true"></div>
@@ -439,17 +440,11 @@ function renderCitySummary(equity: EquityFeatureCollection): void {
           f.properties.need_index >= 0.4 && f.properties.gap < 0,
       ).length;
       el.innerHTML =
-        `<span class="dn-meta-count" data-count="${s.n_block_groups}">0</span> block groups · ` +
-        `<span class="dn-meta-count" data-count="${s.total_recommended_population}">0</span> in recommended corridors · ` +
-        `<span class="dn-meta-count" data-count="${fCount}">0</span> F-grade · ` +
-        `<span class="dn-meta-count" data-count="${hnla}">0</span> high-need / low-access <span class="dn-meta-def">(need ≥0.40, gap &lt;0)</span>`;
-      for (const span of el.querySelectorAll<HTMLElement>(".dn-meta-count")) {
-        const target = Number(span.dataset.count);
-        if (Number.isFinite(target)) {
-          span.textContent = "0";
-          void animateCount(span, target, (v) => Math.round(v).toLocaleString("en-US"));
-        }
-      }
+        `<span class="dn-meta-count" data-count="${s.n_block_groups}">${s.n_block_groups.toLocaleString("en-US")}</span> block groups · ` +
+        `<span class="dn-meta-count" data-count="${s.total_recommended_population}">${s.total_recommended_population.toLocaleString("en-US")}</span> in recommended corridors · ` +
+        `<span class="dn-meta-count" data-count="${fCount}">${fCount}</span> F-grade · ` +
+        `<span class="dn-meta-count" data-count="${hnla}">${hnla}</span> high-need / low-access <span class="dn-meta-def">(need ≥0.40, gap &lt;0)</span>`;
+      // Ribbon is read-only chrome: final values, no count-up.
     })
     .catch(() => { /* non-critical */ });
 }
