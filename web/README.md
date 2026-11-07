@@ -57,6 +57,11 @@ FastAPI service serves (and serves `web/dist/` statically in production).
 | `GET /api/top-underserved?n=25` | JSON records (snapshot columns) |
 | `GET /api/block-group/{geoid}` | one JSON record (snapshot columns) |
 | `GET /api/metadata` | `{ generated_at, summary, methodology_note }` |
+| `GET /api/scenarios` | scenario descriptors (`am_peak` real, `off_peak` approximate) |
+
+`?time_of_day=` is accepted on `/api/equity`, `/api/top-underserved`, and
+`/api/block-group/{geoid}` only (`am_peak` default; `off_peak` = the
+documented approximation above, never a fresh routed network).
 
 Types mirror the real prepared data (`data/prepared/`) — see `src/types.ts`.
 
@@ -73,6 +78,9 @@ Shareable UI state: `?geoid=<geoid>&layer=<layer>&view=<view>` (see `src/lib/url
 On load the app restores the URL state; every state change keeps the
 address bar in sync (`replaceState`, no history spam). "Copy link" in the
 header copies the full share URL (with clipboard fallback).
+
+- `after=1` — Before/After "If recommendations ship" mode.
+- `time_of_day=off_peak` — off-peak scenario (approximate what-if).
 
 ## Onboarding
 
@@ -95,13 +103,31 @@ carry the sketch style + wobbly-bus mascot.
    (deep-link `&after=1`). After = access + precomputed corridor gain
    (`est_access_gain_mean`, reference 2.0×), need held fixed — Gap and
    overall-access recolor with an estimated label; no re-routing.
-3. **Isochrone pulse**: click a block group for a wobbly illustrative
-   coverage circle whose radius scales with the active access layer
-   (Jobs/Healthcare/Food/Schools; otherwise overall access). Caption
-   always states it is a sketch, never a GIS isochrone.
-4. **Header count-up + equity ring gauge**: block-group / resident
-   counts count up on load; the ring shows mean overall access (0–1)
-   from the report-cards summary. Both `prefers-reduced-motion`-safe.
+   Changed block groups (25) get a strong halo while the rest dim; the
+   delta readout names the shift ("25 block groups shift · max +8.3 pp
+   · most see no change"); the After legend domain is rescaled to the
+   moving range and labelled estimated; the drilldown shows the
+   selected block group's `+gain` when it moves.
+3. **Score tooltip** (was: decorative isochrone circle, deleted):
+   hover/click the map for the active layer's score in plain words
+   ("Healthcare access 0.00 — the model finds almost nothing reachable
+   by transit"). No fake geography, no invented travel times.
+4. **Header counts**: block-group / resident counts count up on load,
+   plus F-grade (122) and high-need/low-access
+   (`need ≥ 0.40, gap < 0` — threshold named in code) totals from
+   live equity + report-cards summary. No ring gauge.
+
+**Time-of-day scenario**: AM-peak (default, real) / Off-peak segmented
+control in map controls. Off-peak appends `?time_of_day=off_peak` to
+`/api/equity`, `/api/top-underserved`, `/api/block-group/{geoid}` and
+shows the `/api/scenarios` honesty banner ("approximate what-if, not a
+fresh routed network"). What-if stays AM-peak baseline.
+
+**Drilldown when no corridor serves a block group** (most clicks):
+grade-driven "What this area needs" card (worst category grade +
+overall grade/gap) plus the **nearest** corridor by centroid distance
+(labelled "not serving here" with km) — never a bare empty card, never
+a fabricated serving corridor.
 
 ### Notes / assumptions for the Wizard (API) agent
 - `/api/equity` must be **ACS-joined** (add `poverty_pct`, `zero_car_pct`,

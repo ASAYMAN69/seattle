@@ -9,12 +9,12 @@
  * Multi-value params: first wins (URLSearchParams.get).
  */
 import { LAYERS, type LayerKey } from "./colors";
-import type { AppState, BeforeAfter, ViewKey } from "../state";
+import type { AppState, BeforeAfter, TimeOfDay, ViewKey } from "../state";
 
 const VIEWS: ViewKey[] = ["map", "whatif", "export"];
 
 export type DeepLinkState = Partial<
-  Pick<AppState, "view" | "layer" | "selectedGeoid" | "beforeAfter">
+  Pick<AppState, "view" | "layer" | "selectedGeoid" | "beforeAfter" | "timeOfDay">
 >;
 
 function parseView(raw: string | null): ViewKey | undefined {
@@ -43,6 +43,14 @@ function parseAfter(raw: string | null): BeforeAfter | undefined {
   return undefined;
 }
 
+function parseTimeOfDay(raw: string | null): TimeOfDay | undefined {
+  if (!raw) return undefined;
+  const v = raw.trim().toLowerCase();
+  if (v === "off_peak" || v === "offpeak") return "off_peak";
+  if (v === "am_peak" || v === "ampeak") return "am_peak";
+  return undefined;
+}
+
 /** Parse a search string (with or without leading `?`) into deep-link state. */
 export function parseDeepLink(search: string): DeepLinkState {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
@@ -55,6 +63,8 @@ export function parseDeepLink(search: string): DeepLinkState {
   if (geoid) out.selectedGeoid = geoid;
   const after = parseAfter(params.get("after"));
   if (after) out.beforeAfter = after;
+  const tod = parseTimeOfDay(params.get("time_of_day"));
+  if (tod) out.timeOfDay = tod;
   return out;
 }
 
@@ -64,13 +74,14 @@ export function deepLinkFromLocation(): DeepLinkState {
   return parseDeepLink(window.location.search);
 }
 
-/** Build `?geoid=…&layer=…&view=…&after=1` (defaults omitted for short links). */
+/** Build `?geoid=…&layer=…&view=…&after=1&time_of_day=off_peak` (defaults omitted). */
 export function buildDeepLink(state: AppState): string {
   const params = new URLSearchParams();
   if (state.selectedGeoid) params.set("geoid", state.selectedGeoid);
   if (state.layer !== "need_index") params.set("layer", state.layer);
   if (state.view !== "map") params.set("view", state.view);
   if (state.beforeAfter === "after") params.set("after", "1");
+  if (state.timeOfDay === "off_peak") params.set("time_of_day", "off_peak");
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }

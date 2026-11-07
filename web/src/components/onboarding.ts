@@ -77,10 +77,10 @@ export class Onboarding {
           (_, i) => `<span class="dn-tour-dot" data-i="${i}"></span>`,
         ).join("")}</div>
         <div class="dn-tour-actions">
-          <button class="dn-btn dn-tour-skip" type="button">Skip</button>
+          <button class="dn-btn is-secondary dn-tour-skip" type="button">Skip</button>
           <label class="dn-tour-again"><input type="checkbox" /> Don’t show again</label>
           <span class="dn-tour-spacer"></span>
-          <button class="dn-btn dn-tour-back" type="button" hidden>Back</button>
+          <button class="dn-btn is-secondary dn-tour-back" type="button" hidden>Back</button>
           <button class="dn-btn dn-tour-next" type="button">Next</button>
         </div>
       </div>`;

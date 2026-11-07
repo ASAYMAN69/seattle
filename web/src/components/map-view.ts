@@ -26,7 +26,6 @@ import {
 } from "../lib/colors";
 import { afterAccess } from "../lib/before-after";
 import { paintSketchBoxes } from "../lib/sketch";
-import rough from "roughjs";
 import { actions, getState, subscribe } from "../state";
 import type { EquityFeatureCollection } from "../types";
 
@@ -55,8 +54,7 @@ export class MapView {
   private activeLayer: LayerKey;
   private activeMode: "today" | "after";
   private legendEl: HTMLElement;
-  private pulseEl: HTMLElement | null = null;
-  private pulseAnchor: { lng: number; lat: number } | null = null;
+  private tooltipEl: HTMLElement | null = null;
   private unsub: () => void;
 
   constructor(options: MapViewOptions) {
@@ -113,17 +111,23 @@ export class MapView {
       const geoid = f?.properties?.geoid != null ? String(f.properties.geoid) : null;
       if (geoid) {
         actions.selectGeoid(geoid);
-        this.showPulse(geoid, f!.properties as never, { lng: e.lngLat.lng, lat: e.lngLat.lat });
+        this.showTooltip(geoid, f!.properties as never, e.point);
       }
     });
-    this.map.on("move", () => this.positionPulse());
 
     this.map.on("mousemove", (e) => {
       const features = this.map.queryRenderedFeatures(e.point, {
         layers: ["analysis-fill"],
       });
       this.map.getCanvas().style.cursor = features.length ? "pointer" : "";
+      const f = features[0];
+      if (f?.properties?.geoid != null) {
+        this.showTooltip(String(f.properties.geoid), f.properties as never, e.point, true);
+      } else {
+        this.hideTooltip();
+      }
     });
+    this.map.on("mouseout", () => this.hideTooltip());
 
     options.container.after(this.legendEl);
 
@@ -173,6 +177,22 @@ export class MapView {
       type: "fill",
       source: "equity",
       paint: this.fillPaint(this.activeLayer),
+    });
+    // After-mode dimmer: non-changed polygons fade so the shift reads.
+    this.map.addLayer({
+      id: "after-dimmer",
+      type: "fill",
+      source: "equity",
+      filter: this.changedFilter(false),
+      paint: { "fill-color": "#f6f0e4", "fill-opacity": 0 },
+    });
+    // After-mode halo: strong outline on the changed polygons only.
+    this.map.addLayer({
+      id: "after-halo",
+      type: "line",
+      source: "equity",
+      filter: this.changedFilter(true),
+      paint: { "line-color": "#f0f7ff", "line-opacity": 0, "line-width": 3 },
     });
     this.map.addLayer({
       id: "analysis-line",
@@ -244,6 +264,17 @@ export class MapView {
     // Legend is style-independent (always render — mirrors setLayer).
     this.renderLegend(this.activeLayer, mode);
     if (!this.map.isStyleLoaded()) return;
+    // Halo + dimmer visibility (transition 150 ms, reduced-motion safe).
+    const haloOp = mode === "after" ? 0.95 : 0;
+    const dimOp = mode === "after" ? 0.52 : 0;
+    try {
+      this.map.setLayoutProperty("after-halo", "visibility", "visible");
+      this.map.setLayoutProperty("after-dimmer", "visibility", "visible");
+      this.map.setPaintProperty("after-halo", "line-opacity", haloOp);
+      this.map.setPaintProperty("after-dimmer", "fill-opacity", dimOp);
+    } catch {
+      /* best-effort — legend/paint already applied */
+    }
     const paint = this.fillPaint(this.activeLayer, mode);
     if (!prefersReducedMotion()) {
       this.map.setPaintProperty("analysis-fill", "fill-opacity", 0.35);
@@ -270,13 +301,62 @@ export class MapView {
     };
   }
 
-  /** Column swapped to its `*_after` twin in After mode (gap/access only). */
+  /**
+   * Column swapped to its `*_after` twin in After mode (gap/access only).
+   * Gap in After rescales the diverging domain to the changed range so
+   * the small shift reads (honestly labelled "estimated"; the full
+   * today domain is [-0.39, 0.79]).
+   */
   private effectiveConfig(layer: LayerKey, mode: "today" | "after"): LayerConfig {
     const cfg = layerByKey(layer);
     if (mode !== "after") return cfg;
-    if (cfg.column === "gap") return { ...cfg, column: "gap_after" };
+    if (cfg.column === "gap") {
+      const range = this.changedGapAfterRange();
+      return { ...cfg, column: "gap_after", domain: range ?? cfg.domain };
+    }
     if (cfg.column === "access_overall") return { ...cfg, column: "access_after" };
     return cfg;
+  }
+
+  private changedGapAfterRange(): [number, number] | null {
+    if (this.gains.size === 0) return null;
+    let lo = Number.POSITIVE_INFINITY;
+    let hi = Number.NEGATIVE_INFINITY;
+    for (const f of this.equity.features) {
+      const g = this.gains.get(String(f.properties.geoid));
+      if (g == null) continue;
+      const v = afterAccess(f.properties.access_overall, g) - f.properties.need_index;
+      lo = Math.min(lo, v);
+      hi = Math.max(hi, v);
+    }
+    if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo < 0.05) return null;
+    return [Number(lo.toFixed(2)), Number(hi.toFixed(2))];
+  }
+
+  /**
+   * Swap equity source (time-of-day refetch). Re-augments After fields
+   * (gains are scenario-independent), refreshes paint + legend, keeps
+   * the current viewport (no refit).
+   */
+  setEquity(next: EquityFeatureCollection): void {
+    this.equity = next;
+    if (!this.map.isStyleLoaded()) return;
+    const src = this.map.getSource("equity") as unknown as {
+      setData: (d: unknown) => void;
+    };
+    src.setData(this.equityWithAfter());
+    const paint = this.fillPaint(this.activeLayer, this.activeMode);
+    this.map.setPaintProperty("analysis-fill", "fill-color", paint["fill-color"]);
+    this.renderLegend(this.activeLayer, this.activeMode);
+  }
+
+  /** Filter expression for changed-only / unchanged-only layers. */
+  private changedFilter(changed: boolean): ExpressionSpecification {
+    const ids = [...this.gains.keys()];
+    if (changed) {
+      return ["in", ["get", "geoid"], ["literal", ids]] as unknown as ExpressionSpecification;
+    }
+    return ["all", ["has", "geoid"], ["!", ["in", ["get", "geoid"], ["literal", ids]]]] as unknown as ExpressionSpecification;
   }
 
   /** Equity features augmented with `gap_after` / `access_after` (clone). */
@@ -334,7 +414,7 @@ export class MapView {
     note.className = "dn-map-legend-note";
     note.textContent =
       mode === "after"
-        ? `${cfg.legend}. After = estimated access + corridor gain (no re-routing).`
+        ? `${cfg.legend}. After (estimated): access + corridor gain, no re-routing. Scale fits the moving block groups.`
         : cfg.legend;
     inner.appendChild(note);
 
@@ -343,54 +423,50 @@ export class MapView {
   }
 
   /**
-   * Isochrone pulse — illustrative coverage metaphor (NOT GIS). Draws a
-   * wobbly Rough.js circle at the clicked block group whose radius
-   * scales with the active access-layer score. Caption always says
-   * "not a true isochrone".
+   * Score tooltip (replaces the decorative isochrone circle). Plain-words
+   * explanation of the active layer's score for the hovered/clicked block
+   * group. No fake geography, no invented travel times.
    */
-  showPulse(geoid: string | null, props: {
+  showTooltip(geoid: string, props: {
     access_overall: number;
     jobs_access: number;
     healthcare_access: number;
     food_access: number;
     schools_access: number;
-  } | null, lngLat: { lng: number; lat: number } | null): void {
-    this.pulseEl?.remove();
-    this.pulseEl = null;
-    this.pulseAnchor = null;
-    if (!geoid || !props || !lngLat) return;
+  }, point: { x: number; y: number }, hover = false): void {
+    const layerLabel = layerByKey(this.activeLayer).label;
     const score = Math.min(
       Math.max(accessScoreForLayer(this.activeLayer, props), 0),
       1,
     );
-    this.pulseAnchor = lngLat;
+    const verdict =
+      score <= 0.05
+        ? "the model finds almost nothing reachable by transit"
+        : score >= 0.9
+          ? "almost everything in the model is reachable by transit"
+          : "about " +
+            Math.round(score * 100) +
+            "% of the model's reach";
+    const text = `${layerLabel} ${score.toFixed(2)} — ${verdict}. Score is a 0–1 model value, not a travel time.`;
     const host = this.map.getContainer();
-    const el = document.createElement("div");
-    el.className = "dn-pulse";
-    el.setAttribute("role", "img");
-    const radius = 60 + score * 160;
-    const size = Math.round(radius * 2);
-    el.style.width = `${size}px`;
-    el.style.height = `${size}px`;
-    el.innerHTML =
-      `<span class="dn-pulse-caption">Illustrative coverage — sketch, not a true isochrone. Taller score, wider pulse.</span>` +
-      `<svg class="dn-pulse-art" viewBox="0 0 100 100" aria-hidden="true" focusable="false"></svg>`;
-    host.appendChild(el);
-    // Paint the wobbly circle.
-    paintPulseCircle(el.querySelector("svg") as unknown as SVGSVGElement, geoid);
-    this.pulseEl = el;
-    this.positionPulse();
-    // Re-trigger the one-shot scale-in.
-    el.classList.remove("dn-pulse-enter");
-    void el.offsetWidth;
-    el.classList.add("dn-pulse-enter");
+    if (!this.tooltipEl) {
+      const el = document.createElement("div");
+      el.className = "dn-tip";
+      el.setAttribute("role", "status");
+      host.appendChild(el);
+      this.tooltipEl = el;
+    }
+    const el = this.tooltipEl;
+    el.textContent = text;
+    el.setAttribute("aria-label", `Block group ${geoid}: ${text}`);
+    el.classList.toggle("is-hover", hover);
+    el.style.left = `${point.x + 14}px`;
+    el.style.top = `${point.y - 10}px`;
+    el.hidden = false;
   }
 
-  private positionPulse(): void {
-    if (!this.pulseEl || !this.pulseAnchor) return;
-    const pt = this.map.project([this.pulseAnchor.lng, this.pulseAnchor.lat]);
-    this.pulseEl.style.left = `${pt.x - this.pulseEl.offsetWidth / 2}px`;
-    this.pulseEl.style.top = `${pt.y - this.pulseEl.offsetHeight / 2}px`;
+  hideTooltip(): void {
+    if (this.tooltipEl) this.tooltipEl.hidden = true;
   }
 
   destroy(): void {
@@ -409,26 +485,6 @@ function prefersReducedMotion(): boolean {
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
-}
-
-function paintPulseCircle(svg: SVGSVGElement, geoid: string): void {
-  try {
-    const rc = rough.svg(svg);
-    let seed = 1;
-    for (let i = 0; i < geoid.length; i++) seed = (seed * 31 + geoid.charCodeAt(i)) >>> 0;
-    const g = rc.circle(50, 50, 92, {
-      stroke: "#c4622d",
-      strokeWidth: 1.8,
-      roughness: 1.6,
-      bowing: 2.2,
-      seed: (seed % 90000) + 1000,
-      fill: "rgba(196, 98, 45, 0.12)",
-      fillStyle: "solid",
-    });
-    svg.appendChild(g as unknown as SVGElement);
-  } catch {
-    /* decorative only — never break the map */
-  }
 }
 
 function gradientCss(ramp: string[]): string {

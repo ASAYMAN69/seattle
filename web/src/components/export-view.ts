@@ -85,15 +85,20 @@ export class ExportView {
     paintSketchBoxes(this.container);
   }
 
-  private async loadTop(): Promise<void> {
+  private async loadTop(timeOfDay?: string): Promise<void> {
     // Prefer the API endpoint; fall back to the identical client-side ranking
     // if the endpoint is unavailable (e.g. backend not running).
     try {
-      this.topRows = await api.topUnderserved(25);
+      this.topRows = await api.topUnderserved(25, timeOfDay);
     } catch {
       this.topRows = rankTopUnderserved(this.equity, 25);
     }
     this.renderTable();
+  }
+
+  /** Re-fetch the table for a time-of-day scenario (no rebuild). */
+  async refreshTop(timeOfDay?: string): Promise<void> {
+    await this.loadTop(timeOfDay);
   }
 
   private renderTable(): void {

@@ -159,6 +159,7 @@ button {
 /* Header + nav                                                        */
 /* ================================================================== */
 
+/* Navbar: one cohesive sticky bar (brand | segmented tabs | actions). */
 .dn-header {
   background: var(--paper-2);
   border-bottom: 1.5px solid var(--line-soft);
@@ -170,10 +171,10 @@ button {
 .dn-header-inner {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 12px 24px 8px;
-  display: flex;
+  padding: 10px 24px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
 }
 
@@ -194,17 +195,19 @@ button {
 
 .dn-title {
   font-family: var(--font-hand);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--ink);
+  white-space: nowrap;
 }
 
 .dn-tagline {
-  margin: 2px 0 0;
-  font-size: 0.85rem;
+  margin: 1px 0 0;
+  font-size: 0.8rem;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .dn-meta {
@@ -214,12 +217,17 @@ button {
   color: var(--muted);
 }
 
+/* Segmented control: one outlined group, sliding active pill (border
+   highlight — no wobbly sketch line on small chrome per Task 004). */
 .dn-nav {
   display: flex;
-  gap: 6px;
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 4px 24px 12px;
+  gap: 4px;
+  justify-self: center;
+  background: var(--paper-2);
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-pill);
+  padding: 5px;
+  box-shadow: var(--shadow-paper);
 }
 
 .dn-navbtn {
@@ -228,9 +236,10 @@ button {
   background: transparent;
   color: var(--muted);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-family: var(--font-hand);
-  padding: 7px 15px 5px;
+  padding: 6px 14px 4px;
+  min-height: 44px;
   border-radius: var(--r-pill);
   cursor: pointer;
   transition: transform 140ms var(--ease-out), background 140ms ease,
@@ -348,19 +357,41 @@ button {
   color: var(--muted);
 }
 
-.dn-layer-tabs {
+/* Map controls share the navbar language (same pill scale, curve, and
+   paper surface) and stack as one column so they never overlap. */
+.dn-map-controls {
   position: absolute;
   top: 16px;
   left: 16px;
   z-index: 20;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+}
+
+.dn-mapctl-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.dn-layer-tabs {
   background: var(--paper-2);
   border-radius: var(--r-a);
-  padding: 6px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-lift);
-  max-width: calc(100% - 32px);
+  max-width: 100%;
+}
+
+.dn-layer-tabs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .dn-layer-pill {
@@ -368,10 +399,11 @@ button {
   border: 1.5px solid transparent;
   background: transparent;
   font-weight: 600;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-family: var(--font-hand);
   color: var(--ink-soft);
-  padding: 6px 12px 4px;
+  padding: 4px 12px 2px;
+  min-height: 44px;
   border-radius: var(--r-pill);
   cursor: pointer;
   transition: transform 130ms var(--ease-out), background 140ms ease,
@@ -454,7 +486,7 @@ button {
   display: flex;
   justify-content: space-between;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   color: var(--muted);
 }
 
@@ -663,8 +695,8 @@ button {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-b);
   border: 1.5px solid var(--line-soft);
   background: var(--paper-2);
@@ -711,7 +743,8 @@ button {
 }
 
 .dn-stat-label {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
+  font-weight: 600;
   color: var(--muted);
   margin-bottom: 3px;
 }
@@ -795,7 +828,7 @@ button {
 }
 
 .dn-rec-pop {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--muted);
   margin-top: 4px;
   font-family: var(--font-mono);
@@ -839,6 +872,7 @@ button {
   border: 1.5px solid var(--line-soft);
   border-radius: var(--r-b);
   padding: 9px 34px 9px 12px;
+  min-height: 44px;
   appearance: none;
   cursor: pointer;
   transition: transform 130ms var(--ease-out), border-color 140ms ease;
@@ -850,6 +884,7 @@ button {
 
 .dn-range {
   width: 100%;
+  min-height: 44px;
   accent-color: var(--accent);
   cursor: pointer;
 }
@@ -891,7 +926,8 @@ button {
 }
 
 .dn-metric-label {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
+  font-weight: 600;
   color: var(--muted);
   margin-bottom: 6px;
 }
@@ -908,6 +944,7 @@ button {
   font-size: 0.76rem;
   color: var(--muted);
   margin-top: 6px;
+  min-height: 1em;
 }
 
 /* Rough.js host (sketch-card): outline is the hand-drawn stroke only. */
@@ -1009,10 +1046,23 @@ button {
   font-weight: 700;
   font-family: var(--font-hand);
   font-size: 0.9rem;
-  padding: 8px 16px 6px;
+  padding: 6px 16px 4px;
+  min-height: 44px;
   cursor: pointer;
   transition: transform 140ms var(--ease-out), background 140ms ease,
-    box-shadow 140ms ease;
+    color 140ms ease, border-color 140ms ease;
+}
+
+/* Secondary (outline) — progress/cancel actions next to a primary. */
+.dn-btn.is-secondary {
+  background: transparent;
+  color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dn-btn.is-secondary:hover {
+    background: var(--paper-3);
+  }
 }
 
 .dn-btn:active {
@@ -1075,6 +1125,7 @@ button {
   font-family: var(--font-hand);
   font-size: 0.85rem;
   padding: 6px 12px 4px;
+  min-height: 44px;
   cursor: pointer;
   transition: transform 140ms var(--ease-out), background 140ms ease;
 }
@@ -1166,8 +1217,8 @@ button {
 
 .dn-story-close {
   flex: none;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-b);
   border: 1.5px solid var(--line-soft);
   background: var(--paper-2);
@@ -1247,8 +1298,8 @@ button {
 
 .dn-tour-close {
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-b);
   border: 1.5px solid var(--line-soft);
   background: var(--paper-2);
@@ -1361,18 +1412,17 @@ button {
   color: var(--ink);
 }
 
-/* Before / After segmented toggle (map top-center) */
+/* Before / After segmented toggle (stacked under layer tabs). */
 .dn-beforeafter {
-  position: absolute;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
+  background: var(--paper-2);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-lift);
+}
+
+.dn-beforeafter-row {
   display: flex;
   gap: 6px;
-  background: var(--paper-2);
-  padding: 6px;
-  box-shadow: var(--shadow-lift);
+  flex-wrap: wrap;
 }
 
 .dn-ba-btn {
@@ -1381,9 +1431,10 @@ button {
   background: transparent;
   font-weight: 700;
   font-family: var(--font-hand);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   color: var(--ink-soft);
-  padding: 6px 12px 4px;
+  padding: 4px 12px 2px;
+  min-height: 44px;
   border-radius: var(--r-pill);
   cursor: pointer;
   transition: transform 130ms var(--ease-out), background 140ms ease, color 140ms ease;
@@ -1530,6 +1581,117 @@ button {
 }
 
 /* ================================================================== */
+/* Burst-the-fakes (Task 008): tod toggle, banner, delta, tooltip,      */
+/* needs/gain cards                                                    */
+/* ================================================================== */
+
+.dn-timeofday {
+  background: var(--paper-2);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-lift);
+}
+
+.tod-btn {
+  appearance: none;
+  border: 1.5px solid transparent;
+  background: transparent;
+  font-weight: 700;
+  font-family: var(--font-hand);
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  padding: 4px 12px 2px;
+  min-height: 44px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: transform 130ms var(--ease-out), background 140ms ease, color 140ms ease;
+}
+
+.tod-btn:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+.tod-btn.is-active {
+  background: var(--ink);
+  color: var(--paper-2);
+  border-color: var(--ink);
+  transform: rotate(-1deg);
+}
+
+.dn-scenario-banner {
+  background: var(--accent-soft);
+  border-radius: var(--r-b);
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 460px;
+}
+
+.dn-delta-readout {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--ink-soft);
+}
+
+.dn-tip {
+  position: absolute;
+  z-index: 18;
+  pointer-events: none;
+  background: var(--paper-2);
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-b);
+  box-shadow: var(--shadow-lift);
+  padding: 8px 11px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 260px;
+  line-height: 1.45;
+}
+
+.dn-tip.is-hover {
+  background: rgba(251, 247, 238, 0.95);
+}
+
+.dn-needs {
+  border: 1.5px dashed var(--line);
+  border-radius: var(--r-a);
+  padding: 18px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--paper-2);
+}
+
+.dn-needs .dn-mascot {
+  display: block;
+  margin: 0 auto 8px;
+  width: 56px;
+  height: 56px;
+  color: var(--accent);
+}
+
+.dn-needs-lead {
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.dn-gain-note {
+  background: var(--accent-soft);
+  border-radius: var(--r-b);
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.dn-meta-def {
+  font-size: 0.72rem;
+}
+
+/* ================================================================== */
 /* Reduced motion                                                      */
 /* ================================================================== */
 
@@ -1559,24 +1721,35 @@ button {
 
 @media (max-width: 720px) {
   .dn-header-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 12px 16px 8px;
-    gap: 6px;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "brand actions" "nav nav";
+    padding: 10px 16px;
+    gap: 8px 12px;
   }
 
-  .dn-meta {
-    text-align: left;
+  .dn-brand {
+    grid-area: brand;
   }
 
   .dn-nav {
-    padding: 0 16px 10px;
+    grid-area: nav;
+    justify-self: stretch;
+  }
+
+  .dn-header-actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+
+  .dn-meta {
+    display: none;
   }
 
   .dn-navbtn {
-    flex: 1;
+    flex: 1 1 auto;
     text-align: center;
-    padding: 7px 8px 5px;
+    min-height: 44px;
+    padding: 6px 8px 4px;
     font-size: 0.84rem;
   }
 
@@ -1585,13 +1758,20 @@ button {
     gap: 16px;
   }
 
-  .dn-layer-tabs {
+  .dn-map-controls {
     top: 10px;
     left: 10px;
     right: 10px;
     max-width: none;
+  }
+
+  .dn-layer-tabs {
+    max-width: none;
+    padding: 6px 8px;
+  }
+
+  .dn-layer-tabs-row {
     gap: 4px;
-    padding: 4px;
   }
 
   .dn-layer-pill {
@@ -1599,6 +1779,13 @@ button {
     text-align: center;
     min-height: 44px;
     padding: 6px 6px 4px;
+    font-size: 0.8rem;
+  }
+
+  .dn-ba-btn {
+    flex: 1 1 auto;
+    text-align: center;
+    min-height: 44px;
     font-size: 0.8rem;
   }
 
@@ -1643,15 +1830,6 @@ button {
 
   .dn-boot-scene {
     width: min(300px, 84vw);
-  }
-
-  .dn-beforeafter {
-    top: auto;
-    bottom: 118px;
-    left: 10px;
-    right: 10px;
-    transform: none;
-    justify-content: center;
   }
 
   .dn-pulse-caption {

@@ -5,11 +5,14 @@ export type ViewKey = "map" | "whatif" | "export";
 
 export type BeforeAfter = "today" | "after";
 
+export type TimeOfDay = "am_peak" | "off_peak";
+
 export interface AppState {
   view: ViewKey;
   layer: LayerKey;
   selectedGeoid: string | null;
   beforeAfter: BeforeAfter;
+  timeOfDay: TimeOfDay;
 }
 
 type Listener = (next: AppState, prev: AppState) => void;
@@ -19,6 +22,7 @@ const initialState: AppState = {
   layer: "need_index",
   selectedGeoid: null,
   beforeAfter: "today",
+  timeOfDay: "am_peak",
 };
 
 let state: AppState = { ...initialState };
@@ -40,7 +44,8 @@ function set(patch: Partial<AppState>): void {
     next.view === prev.view &&
     next.layer === prev.layer &&
     next.selectedGeoid === prev.selectedGeoid &&
-    next.beforeAfter === prev.beforeAfter
+    next.beforeAfter === prev.beforeAfter &&
+    next.timeOfDay === prev.timeOfDay
   ) {
     return;
   }
@@ -53,6 +58,7 @@ export const actions = {
   setLayer: (layer: LayerKey) => set({ layer }),
   selectGeoid: (geoid: string | null) => set({ selectedGeoid: geoid }),
   setBeforeAfter: (beforeAfter: BeforeAfter) => set({ beforeAfter }),
+  setTimeOfDay: (timeOfDay: TimeOfDay) => set({ timeOfDay }),
   /** Atomic restore (used by deep-link boot): one notification, one render. */
   restore: (patch: Partial<AppState>) => set(patch),
 };

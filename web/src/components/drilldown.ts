@@ -18,10 +18,15 @@ import type {
   RecommendationProperties,
 } from "../types";
 
+/** High-need/low-access threshold for the header count (single constant). */
+export const HIGH_NEED_MIN = 0.4;
+export const LOW_ACCESS_MAX = 0;
+
 interface DrilldownOptions {
   container: HTMLElement;
   equityById: Map<string, EquityFeature>;
   recommendations: RecommendationFeature[];
+  gains?: Map<string, number>;
 }
 
 interface RecommendationView {
@@ -34,14 +39,17 @@ export class Drilldown {
   private container: HTMLElement;
   private equityById: Map<string, EquityFeature>;
   private recommendations: RecommendationFeature[];
+  private gains: Map<string, number>;
   private unsub: () => void;
   private closeBtn: HTMLButtonElement;
   private anchorGeoid: string | null;
+  private returnFocus: HTMLElement | null = null;
 
   constructor(options: DrilldownOptions) {
     this.container = options.container;
     this.equityById = options.equityById;
     this.recommendations = options.recommendations;
+    this.gains = options.gains ?? new Map();
     const anchor = pickStoryAnchor({
       type: "FeatureCollection",
       features: [...this.equityById.values()],
@@ -80,7 +88,9 @@ export class Drilldown {
       scrim.setAttribute("aria-hidden", show ? "false" : "true");
     }
     if (!geoid) {
+      const wasOpen = !this.container.hidden;
       this.container.hidden = true;
+      if (wasOpen) this.returnFocus?.focus?.();
       return;
     }
     const feature = this.equityById.get(geoid);
@@ -167,21 +177,29 @@ export class Drilldown {
       chips.appendChild(chip);
     }
 
-    // Top recommendations.
+    // After-mode gain (estimated) — only when recommendations ship.
+    const gain = this.gains.get(geoid);
+    if (getState().beforeAfter === "after" && gain != null && gain > 0) {
+      const gainLine = document.createElement("div");
+      gainLine.className = "dn-gain-note";
+      gainLine.textContent = `If recommendations ship: +${(gain * 100).toFixed(1)} pp access (estimated, no re-routing).`;
+      body.appendChild(gainLine);
+    }
+
+    // Top recommendations — never a bare empty card (see Task 008).
     const recs = this.topRecommendations(p.geoid);
     const recSection = document.createElement("div");
     recSection.className = "dn-recs";
     const recTitle = document.createElement("div");
     recTitle.className = "dn-section-label";
-    recTitle.textContent = "Top recommendations";
     recSection.appendChild(recTitle);
 
     if (recs.length === 0) {
-      const none = document.createElement("div");
-      none.className = "dn-empty";
-      none.innerHTML = `<span class="dn-mascot" aria-hidden="true">${busSvg({ size: 56 })}</span><p class="dn-muted" style="margin:0">No corridor recommendations currently target this block group.</p>`;
-      recSection.appendChild(none);
+      recTitle.textContent = "What this area needs";
+      const needs = this.needsCard(p, feature);
+      recSection.appendChild(needs);
     } else {
+      recTitle.textContent = "Top recommendations";
       const list = document.createElement("ul");
       list.className = "dn-rec-list";
       for (const rec of recs) {
@@ -204,6 +222,104 @@ export class Drilldown {
     }
   }
 
+  /**
+   * Grade-driven "What this area needs" card (no corridor serves this
+   * block group): worst category grade → one-sentence need + nearest
+   * corridor by centroid distance (labelled nearest, never serving).
+   */
+  private needsCard(
+    p: EquityFeature["properties"],
+    feature: EquityFeature,
+  ): HTMLElement {
+    const wrap = document.createElement("div");
+    wrap.className = "dn-needs";
+    const cats: Array<[string, string | null]> = [
+      ["Jobs", p.jobs_grade],
+      ["Healthcare", p.healthcare_grade],
+      ["Schools", p.schools_grade],
+      ["Food", p.food_grade],
+    ];
+    const rank = (g: string | null): number =>
+      ({ A: 0, B: 1, C: 2, D: 3, F: 4 })[String(g ?? "").trim().toUpperCase()] ?? 5;
+    const worst = [...cats].sort((a, b) => rank(b[1]) - rank(a[1]))[0]!;
+    const worstLabel = `${worst[0]} ${String(worst[1] ?? "—").trim().toUpperCase() || "—"}`;
+    const needSentence =
+      worst[0] === "Jobs"
+        ? "Improving job access matters most here — the Jobs grade is the thinnest thread."
+        : `${worst[0]} access is the thinnest thread — the ${worstLabel} grade says it plainly.`;
+    const nearest = this.nearestCorridor(feature);
+    const nearHtml =
+      nearest && nearest.distKm != null
+        ? `<div class="dn-rec-pop">Nearest corridor (not serving here): ${escapeHtml(nearest.corridor)} · ≈ ${nearest.distKm.toFixed(1)} km from this block group’s center.</div>`
+        : nearest
+          ? `<div class="dn-rec-pop">Nearest corridor (not serving here): ${escapeHtml(nearest.corridor)}.</div>`
+          : "";
+    wrap.innerHTML =
+      `<span class="dn-mascot" aria-hidden="true">${busSvg({ size: 56 })}</span>` +
+      `<div class="dn-needs-lead">${escapeHtml(needSentence)}</div>` +
+      `<div class="dn-rec-pop">Overall grade ${escapeHtml(String(p.grade ?? "—").trim().toUpperCase() || "—")} · gap ${p.gap >= 0 ? "+" : "−"}${Math.abs(p.gap).toFixed(2)} (access − need).</div>` +
+      nearHtml;
+    return wrap;
+  }
+
+  /** Bounding-box centroid of the feature geometry (for distance rank). */
+  private featureCentroid(
+    f: EquityFeature,
+  ): { lat: number; lon: number } | null {
+    const geom = f.geometry;
+    if (!geom) return null;
+    let minLat = Infinity;
+    let maxLat = -Infinity;
+    let minLon = Infinity;
+    let maxLon = -Infinity;
+    const visit = (coords: unknown): void => {
+      if (!Array.isArray(coords)) return;
+      if (typeof coords[0] === "number" && typeof coords[1] === "number") {
+        const [lon, lat] = coords as [number, number];
+        minLon = Math.min(minLon, lon);
+        maxLon = Math.max(maxLon, lon);
+        minLat = Math.min(minLat, lat);
+        maxLat = Math.max(maxLat, lat);
+        return;
+      }
+      for (const c of coords) visit(c);
+    };
+    visit(geom.coordinates);
+    if (!Number.isFinite(minLat)) return null;
+    return { lat: (minLat + maxLat) / 2, lon: (minLon + maxLon) / 2 };
+  }
+
+  private nearestCorridor(feature: EquityFeature): {
+    corridor: string;
+    distKm: number | null;
+  } | null {
+    const c = this.featureCentroid(feature);
+    if (!c || this.recommendations.length === 0) return null;
+    let best: { corridor: string; dist: number } | null = null;
+    for (const f of this.recommendations) {
+      const props = f.properties as RecommendationProperties;
+      const { centroid_lat, centroid_lon } = props;
+      if (typeof centroid_lat !== "number" || typeof centroid_lon !== "number") continue;
+      const dLat = (centroid_lat - c.lat) * 111;
+      const dLon = (centroid_lon - c.lon) * 111 * Math.cos((c.lat * Math.PI) / 180);
+      const dist = Math.hypot(dLat, dLon);
+      if (!best || dist < best.dist) best = { corridor: props.corridor, dist };
+    }
+    if (!best) return null;
+    return { corridor: best.corridor, distKm: best.dist };
+  }
+
+  /** Swap the feature map (time-of-day refetch) and re-render. */
+  setEquityById(next: Map<string, EquityFeature>): void {
+    this.equityById = next;
+    const anchor = pickStoryAnchor({
+      type: "FeatureCollection",
+      features: [...this.equityById.values()],
+    });
+    this.anchorGeoid = anchor ? String(anchor.properties.geoid) : null;
+    this.render();
+  }
+
   private topRecommendations(geoid: string): RecommendationView[] {
     const matched: Array<RecommendationView & { pop: number }> = [];
     for (const f of this.recommendations) {
@@ -222,11 +338,15 @@ export class Drilldown {
   }
 
   private setContent(body: HTMLElement): void {
+    const firstOpen = this.container.querySelector(".dn-drawer-body") == null;
     this.container.querySelector(".dn-drawer-body")?.remove();
     this.container.appendChild(body);
     // Drawer is a Rough.js host (single hand-drawn outline). Empty states
     // inside are CSS-dashed only — never painted.
     paintSketchBoxes(this.container, ".dn-drawer");
+    if (firstOpen) {
+      this.returnFocus = document.activeElement as HTMLElement | null;
+    }
     this.closeBtn.focus();
   }
 

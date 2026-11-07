@@ -29,6 +29,7 @@ export class StoryPanel {
   private sensitivity: SensitivityRecord[];
   private narrateStep = 0;
   private narrateTimer: number | null = null;
+  private returnFocus: HTMLElement | null = null;
 
   constructor(options: StoryPanelOptions) {
     this.container = options.container;
@@ -37,6 +38,7 @@ export class StoryPanel {
     this.sensitivity = options.sensitivity;
 
     this.container.classList.add("dn-story", "sketch-card");
+    this.container.setAttribute("role", "dialog");
     this.container.setAttribute("aria-label", "Featured human story");
 
     const anchor = toStoryAnchor(this.feature);
@@ -55,7 +57,7 @@ export class StoryPanel {
       </div>
       <p class="dn-story-text">${storyNarrative(anchor, nRecs)}</p>
       <div class="dn-story-actions">
-        <button class="dn-btn dn-narrate-toggle" type="button" aria-expanded="false">Hear the trip</button>
+        <button class="dn-btn is-secondary dn-narrate-toggle" type="button" aria-expanded="false">Hear the trip</button>
         <button class="dn-btn dn-story-cta" type="button">See its report card</button>
       </div>
       <div class="dn-narrate" hidden>
@@ -69,14 +71,22 @@ export class StoryPanel {
         <div class="dn-narrate-dots" aria-hidden="true"></div>
         <div class="dn-narrate-actions">
           <button class="dn-btn dn-narrate-play" type="button">Play</button>
-          <button class="dn-btn dn-narrate-back" type="button" hidden>Back</button>
-          <button class="dn-btn dn-narrate-next" type="button">Next</button>
+          <button class="dn-btn is-secondary dn-narrate-back" type="button" hidden>Back</button>
+          <button class="dn-btn is-secondary dn-narrate-next" type="button">Next</button>
         </div>
       </div>`;
 
+    this.returnFocus = document.activeElement as HTMLElement | null;
     const close = this.container.querySelector<HTMLButtonElement>(".dn-story-close")!;
     close.addEventListener("click", () => {
       this.container.remove();
+      this.returnFocus?.focus?.();
+    });
+    this.container.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        this.container.remove();
+        this.returnFocus?.focus?.();
+      }
     });
 
     const cta = this.container.querySelector<HTMLButtonElement>(".dn-story-cta")!;
