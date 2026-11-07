@@ -57,9 +57,3 @@ scripts/fetch_census.py → scripts/fetch_opportunities.py → scripts/run_analy
 - Census **ACS** 5-year block-group demographics + **TIGER** geometry
 - LEHD **LODES** jobs (WA)
 - OpenStreetMap / Washington Open Data **POIs** (healthcare, schools, food)
-
-## Docs
-
-- Design: `docs/superpowers/specs/2026-11-06-seattle-transit-equity-design.md`
-- Implementation plan: `docs/superpowers/plans/2026-11-06-seattle-transit-equity.md`
-- Submission checklist: `CHECKLIST.md`
