@@ -57,3 +57,15 @@ scripts/fetch_census.py → scripts/fetch_opportunities.py → scripts/run_analy
 - Census **ACS** 5-year block-group demographics + **TIGER** geometry
 - LEHD **LODES** jobs (WA)
 - OpenStreetMap / Washington Open Data **POIs** (healthcare, schools, food)
+
+### Attribution & licensing
+- **GTFS:** King County Metro & Sound Transit — public transit data, used per the
+  agencies' open-data terms and King County's data license.
+- **Census ACS / TIGER:** US Census Bureau — public domain; courtesy of the US
+  Census Bureau. ACS 5-year estimates are used with normal statistical caveats
+  (margins of error; suppressed/unreliable values handled as missing).
+- **LODES (LEHD):** US Census Bureau data, public domain.
+- **OpenStreetMap:** © OpenStreetMap contributors, ODbL 1.0
+  (https://www.openstreetmap.org/copyright). POIs are points of interest only —
+  no personal data is used or collected.
+- No API keys required; no PII; no user data collected.

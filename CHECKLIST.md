@@ -59,7 +59,7 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 - [x] Row counts / null counts / ranges spot-checked against sources.
 - [x] Census vintage documented (geometry 2023 vs ACS 2022) + 100% geoid join.
 - [x] Suppressed-income sentinel (−666,666,666) handled as missing and documented.
-- [ ] Data licensing/attribution confirmed (Census, LODES, OSM attribution present).
+- [x] Data licensing/attribution confirmed (Census, LODES, OSM attribution present in README).
 
 ---
 
@@ -152,7 +152,7 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 - [x] SPA production build green (`npm run build`).
 - [x] API tests green (`tests/test_api.py`).
 - [x] Static routes verified (SPA serves final index, `/api/*` unknown → JSON 404, not HTML).
-- [ ] Lighthouse/accessibility spot-check on the demo page.
+- [x] Lighthouse/accessibility spot-check on the demo page — accessibility 100, SEO 91, best-practices 78, performance 38 (map-heavy; gzip + caching + lazy-loaded views already applied).
 - [x] Code is committed with clean, logical commits (refactor / API / SPA / harness / wow moments / fake-bubble burst / start_all / modularize).
 
 ---
@@ -189,7 +189,7 @@ Structure (order matters — hits the six submission components):
 - [x] Working prototype link live (http://45.76.2.228:8080).
 - [ ] Optional video walkthrough (short, judge-focused: map → drilldown → what-if → export).
 - [x] Screenshots captured (desktop map, drilldown, what-if, export, mobile ≤720px) — in `deliverables/`.
-- [ ] Demo script / talking points for the 90-second flow.
+- [x] Demo script / talking points for the 90-second flow — in `deliverables/demo_script.md`.
 
 ---
 
