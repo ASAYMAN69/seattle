@@ -98,3 +98,27 @@ Key real-data outputs on disk (data/prepared):
   pulse caption 'Illustrative coverage — sketch, not a true isochrone' in
   DOM). Committed ff7d45f→95f840f (95f840f = wow moments). CHECKLIST §6B
   marked done. Wizard unchanged (Task 002 still current).
+- 2026-11-07: **User audit — "fake bubbles"** (verified by main agent against
+  live API): (1) Before/After invisible — gains 0.010–0.083 over gap domain
+  −0.39–0.79 on only 25/1,545 BGs (1.6%), arithmetically correct but
+  invisible; (2) 0.44 gauge = real mean_access 0.4358 but context-free ring
+  (reads hardcoded); (3) recs cover only 25 BGs → empty card on 98.4% of
+  clicks; (4) time-of-day = backend done, ZERO frontend references
+  (unreachable feature). **Dispatch — Picasso Task 008**
+  (`agents/picasso/tasks/burst-fakes-008.md`): one verdict per bubble —
+  replace (before/after halo + delta readout + rescaled legend; grade-driven
+  rec fallback + nearest corridor; time-of-day toggle wiring; header
+  contextual counts) or delete (0.44 ring, isochrone pulse → score tooltip).
+  FE-only, no API change. Awaiting human launch.
+- 2026-11-07: **Picasso Task 007 DONE** (navbar/playcards; build green
+  27 modules, services 200, 18×44px targets, focus-return present).
+  **Picasso Task 008 DONE** (burst fakes; build green 27 modules;
+  time-of-day wired in client/state/url/map; pulse + gauge gone; halo/
+  dimmer + readout; header 122/22 verified live vs API; nearest-corridor
+  labeled 'not serving here'). Committed 9bdc284 (007) + d914b6f (008).
+- 2026-11-07: **Dispatch — Picasso Task 007**
+  (`agents/picasso/tasks/navbar-playcards-007.md`): navbar overhaul (integrate
+  header+nav into one cohesive sticky bar; segmented view tabs; layer pills +
+  Before/After aligned as map controls) + playcards UX optimization (affordance,
+  hit targets ≥44px, type hierarchy, progressive disclosure, consistent dialog/
+  empty states). FE-only, no behavior/API change. Awaiting human launch.
