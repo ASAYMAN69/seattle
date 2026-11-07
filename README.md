@@ -14,6 +14,12 @@ Built for the **DataNova 2026 Global Data-thon** (Track: Operations Research & D
 | 3 | App — Vite + TypeScript + MapLibre GL SPA over a FastAPI backend | ✅ Done |
 | 4 | Submission deck + final QA | 🔜 In progress |
 
+## Deployment
+
+The demo is currently served locally (`./start_all.sh` → `http://localhost:4173`).
+A **free, static deployment** (SPA + precomputed JSON on GitHub Pages) is in
+prep so judges get one zero-friction public URL. Tracked in `CHECKLIST.md` §9.
+
 ## Stack
 
 - **Backend:** FastAPI (`api/`) — read-only JSON endpoints over the prepared data; serves the built SPA (`web/dist`) same-origin.
@@ -56,5 +62,4 @@ scripts/fetch_census.py → scripts/fetch_opportunities.py → scripts/run_analy
 
 - Design: `docs/superpowers/specs/2026-11-06-seattle-transit-equity-design.md`
 - Implementation plan: `docs/superpowers/plans/2026-11-06-seattle-transit-equity.md`
-- Shared project memory: `context/` (see `context/README.md`)
 - Submission checklist: `CHECKLIST.md`

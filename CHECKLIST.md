@@ -72,7 +72,7 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 - [x] Access Index = normalized composite of category access (0–1).
 - [x] Gap (Equity) score = Access − Need, quartile-coded into grades A–F.
 - [x] Coverage documented: weekday AM-peak default scenario, static-network approximations.
-- [x] Documented deviations are recorded in `context/decisions.md` and surfaced in the deck.
+- [x] Documented deviations are recorded in `docs/superpowers/plans/2026-11-06-seattle-transit-equity.md` (and the design spec) — surfaced in the deck.
 - [x] Validation checks: population sums reconcile with census totals; grades sensitivity
       to thresholds; qualitative map review.
 - [x] Reproducibility: pipeline runs end-to-end (fetch → parse → analysis) to regenerate
@@ -197,7 +197,7 @@ Structure (order matters — hits the six submission components):
 
 - [x] README: accurate status, setup, how to run dev/prod, data sources, methodology, deployment.
 - [x] API docs (`/docs`) accurate and complete.
-- [x] Repo is public and has a runnable pipeline + clean `context/` / docs (incl. `context/README.md` file-by-file map).
+- [x] Repo is public and has a runnable pipeline + clean docs (design spec + implementation plan).
 - [x] `CHECKLIST.md` (this file) tracked honestly — never check boxes pre-emit.
 - [x] Methodology + validation summary exists in repo (re-runnable).
 
