@@ -127,7 +127,7 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 
 - [x] **Animated commute narrator:** sketch bus mascot narrates a real door-to-door trip for the anchor block group (wait/ride/walk breakdown from prepared fields only; qualitative where no travel-time field exists).
 - [x] **Before / After Seattle toggle:** "Today" vs "If top recommendations ship" — Equity Gap choropleth morphs, underserved fields brighten — visual proof for 40,813 affected residents.
-- [x] **Isochrone pulse:** click a block group → sketch-style 30-min walking+transit coverage draws outward; scales with selected access layer (Jobs / Healthcare / Food / Schools).
+- [x] **Isochrone pulse:** click a block group → score tooltip (honest, "0–1 model value, not a travel time") — sketch pulse circle was deleted as a fake bubble (see Task 008).
 - [x] City-summary count-up + equity-score ring gauge on the map header (motion escalation).
 
 ---
@@ -153,17 +153,17 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 - [x] API tests green (`tests/test_api.py`).
 - [x] Static routes verified (SPA serves final index, `/api/*` unknown → JSON 404, not HTML).
 - [ ] Lighthouse/accessibility spot-check on the demo page.
-- [x] Code is committed with clean, logical commits (refactor / API / SPA / harness).
+- [x] Code is committed with clean, logical commits (refactor / API / SPA / harness / wow moments / fake-bubble burst / start_all).
 
 ---
 
 ## 9. Deployment (working demo link — required deliverable)
 
 - [ ] Host chosen: Hugging Face Spaces (primary) or Streamlit Cloud (backup) — free tier.
-- [ ] Production path defined: FastAPI serves `web/dist` + `/api` same-origin (single process).
+- [x] Production path defined: FastAPI serves `web/dist` + `/api` same-origin (single process).
 - [ ] Deployed demo URL is public, loads the map with real data, and remains up.
 - [ ] Demo URL tested in a fresh browser (not logged in, not local) before submission.
-- [ ] Environment variables / build steps documented so the deploy is reproducible.
+- [x] Environment variables / build steps documented so the deploy is reproducible (see `start_all.sh` + `web/README.md`).
 
 ---
 
@@ -197,7 +197,7 @@ Structure (order matters — hits the six submission components):
 
 - [ ] README: accurate status, setup, how to run dev/prod, data sources, methodology, deployment.
 - [x] API docs (`/docs`) accurate and complete.
-- [ ] Repo is public and has a runnable pipeline + clean `context/` / docs.
+- [x] Repo is public and has a runnable pipeline + clean `context/` / docs.
 - [x] `CHECKLIST.md` (this file) tracked honestly — never check boxes pre-emit.
 - [x] Methodology + validation summary exists in repo (re-runnable).
 
