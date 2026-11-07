@@ -159,10 +159,10 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 
 ## 9. Deployment (working demo link — required deliverable)
 
-- [ ] Host chosen: Hugging Face Spaces (primary) or Streamlit Cloud (backup) — free tier.
+- [x] Host chosen: **Linux VPS** (45.76.2.228) — free-tier alternative to HF Spaces/Docker (Docker on HF is now paid). Serves the real FastAPI + SPA + `/api` same-origin on one port.
 - [x] Production path defined: FastAPI serves `web/dist` + `/api` same-origin (single process).
-- [ ] Deployed demo URL is public, loads the map with real data, and remains up.
-- [ ] Demo URL tested in a fresh browser (not logged in, not local) before submission.
+- [x] Deployed demo URL is public, loads the map with real data, and remains up — http://45.76.2.228:8080 (verified external 200 + real data).
+- [x] Demo URL tested in a fresh browser (headless Chromium, desktop + mobile, no login) — all four views render.
 - [x] Environment variables / build steps documented so the deploy is reproducible (see `start_all.sh` + `web/README.md`).
 
 ---
@@ -171,24 +171,24 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 
 Structure (order matters — hits the six submission components):
 
-- [ ] Title + team.
-- [ ] Problem statement (urban mobility, underserved routes, Seattle context).
-- [ ] Solution & methodology (GTFS graph → accessibility → need/gap → grades → recommendations).
-- [ ] Data & rigor (real sources, validation, documented deviations/limitations).
-- [ ] Results (key numbers: corridors, affected population, gap distribution, grade map).
-- [ ] Impact & feasibility (planner-actionable recommendations, quantified).
-- [ ] Demonstration (screenshots / live link / walkthrough guide).
-- [ ] Limitations & honest caveats (AM-peak approximation, static network).
-- [ ] Team contributions (who did what).
-- [ ] Deck opens cleanly (no missing fonts/images, no broken links).
+- [x] Title + team (title done; team names need final fill-in on slide 9).
+- [x] Problem statement (urban mobility, underserved routes, Seattle context).
+- [x] Solution & methodology (GTFS graph → accessibility → need/gap → grades → recommendations).
+- [x] Data & rigor (real sources, validation, documented deviations/limitations).
+- [x] Results (key numbers: corridors, affected population, gap distribution, grade map).
+- [x] Impact & feasibility (planner-actionable recommendations, quantified).
+- [x] Demonstration (screenshots / live link / walkthrough guide).
+- [x] Limitations & honest caveats (AM-peak approximation, static network).
+- [ ] Team contributions (real names — currently placeholders).
+- [x] Deck opens cleanly (validated: schema PASS, python-pptx opens 10 slides).
 
 ---
 
 ## 11. Demonstration (required deliverable)
 
-- [ ] Working prototype link live (see Section 9).
+- [x] Working prototype link live (http://45.76.2.228:8080).
 - [ ] Optional video walkthrough (short, judge-focused: map → drilldown → what-if → export).
-- [ ] Screenshots captured (desktop map, report card, what-if, export, mobile ≤720px).
+- [x] Screenshots captured (desktop map, drilldown, what-if, export, mobile ≤720px) — in `deliverables/`.
 - [ ] Demo script / talking points for the 90-second flow.
 
 ---

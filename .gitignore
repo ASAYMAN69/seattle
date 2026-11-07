@@ -8,3 +8,4 @@ data/raw/
 data/prepared/
 !data/prepared/.gitkeep
 .env
+gitignore/
