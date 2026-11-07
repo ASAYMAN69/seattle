@@ -46,7 +46,7 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 - [x] Target personas defined (judge, transit planner/advocate, resident/civic user).
 - [x] Non-novelty check: confirm the Transit Equity Report Card / gap-score / what-if
       explorer differentiate from the saturated churn/fraud/intrusion ideas.
-- [ ] README updated to reflect final product (it is currently stale).
+- [x] README updated to reflect final product (stack, status, run instructions, pipeline).
 
 ---
 
@@ -153,7 +153,7 @@ Package → Submit**. Checked items are ones verified done; unchecked items rema
 - [x] API tests green (`tests/test_api.py`).
 - [x] Static routes verified (SPA serves final index, `/api/*` unknown → JSON 404, not HTML).
 - [ ] Lighthouse/accessibility spot-check on the demo page.
-- [x] Code is committed with clean, logical commits (refactor / API / SPA / harness / wow moments / fake-bubble burst / start_all).
+- [x] Code is committed with clean, logical commits (refactor / API / SPA / harness / wow moments / fake-bubble burst / start_all / modularize).
 
 ---
 
@@ -195,9 +195,9 @@ Structure (order matters — hits the six submission components):
 
 ## 12. Documentation (Presentation & Documentation, 10%)
 
-- [ ] README: accurate status, setup, how to run dev/prod, data sources, methodology, deployment.
+- [x] README: accurate status, setup, how to run dev/prod, data sources, methodology, deployment.
 - [x] API docs (`/docs`) accurate and complete.
-- [x] Repo is public and has a runnable pipeline + clean `context/` / docs.
+- [x] Repo is public and has a runnable pipeline + clean `context/` / docs (incl. `context/README.md` file-by-file map).
 - [x] `CHECKLIST.md` (this file) tracked honestly — never check boxes pre-emit.
 - [x] Methodology + validation summary exists in repo (re-runnable).
 
