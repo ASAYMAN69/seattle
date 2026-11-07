@@ -125,6 +125,7 @@ function boot(): void {
   updateTimeOfDay();
   scrim.addEventListener("click", () => actions.selectGeoid(null));
   wireCopyLink();
+  wireControlsToggle();
 
   // Stagger view content on switch; keep the shareable URL in sync.
   subscribe((next, prev) => {
@@ -167,6 +168,16 @@ function boot(): void {
   // Paint sketch outlines for the always-visible chrome.
   paintSketchBoxes();
   window.addEventListener("resize", () => paintSketchBoxes());
+}
+
+function wireControlsToggle(): void {
+  const controls = document.getElementById("map-controls");
+  const toggle = document.getElementById("ctl-toggle");
+  if (!controls || !toggle) return;
+  toggle.addEventListener("click", () => {
+    const open = controls.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", String(open));
+  });
 }
 
 async function loadData(): Promise<DataBundle> {

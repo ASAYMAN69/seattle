@@ -394,6 +394,18 @@ button {
   gap: 12px;
 }
 
+/* Collapsible controls: toggle is hidden on desktop; body always shown. */
+.dn-ctl-toggle {
+  display: none;
+}
+
+.dn-ctl-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
 .dn-mapctl-label {
   display: block;
   font-size: 0.72rem;
@@ -1895,6 +1907,41 @@ button {
     left: 10px;
     right: 10px;
     max-width: none;
+  }
+
+  /* Mobile: controls collapsed by default — small toggle header only. */
+  .dn-ctl-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+    background: transparent;
+    border: 0;
+    font-family: var(--font-hand);
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 2px 0;
+  }
+
+  .dn-ctl-toggle-icon {
+    transition: transform 160ms var(--ease-out);
+  }
+
+  .dn-map-controls.is-open .dn-ctl-toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .dn-map-controls .dn-ctl-body {
+    display: none;
+  }
+
+  .dn-map-controls.is-open .dn-ctl-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .dn-layer-tabs {
