@@ -116,6 +116,21 @@ Key real-data outputs on disk (data/prepared):
   time-of-day wired in client/state/url/map; pulse + gauge gone; halo/
   dimmer + readout; header 122/22 verified live vs API; nearest-corridor
   labeled 'not serving here'). Committed 9bdc284 (007) + d914b6f (008).
+- 2026-11-07: User rejected fake "human-like" comment injection (honest
+  refus; — no deceptive work). Agreed instead: **modularize the SPA** with
+  honest, useful comments. Committed user's Task 009 in-progress work as
+  1d07f22 (navbar/map-controls redesign + charts + story-panel polish).
+  **Dispatch — Picasso Task 010** (`agents/picasso/tasks/modularize-010.md`):
+  behavior-preserving split of main.ts (585) / map-view.ts (547) /
+  export-view.ts (376) etc. into focused modules; build + live browser
+  verification; no fake comments. Awaiting human launch.
+- 2026-11-07: **Picasso Task 010 DONE** (verified: main.ts 585→7; map-view
+  547→378 (cohesive class, permitted exception); export-view 376→141 with
+  charts/snapshot/format modules; whatif minimap widget; build green 7.3s;
+  browser smoke 17/17; no dangling refs). Committed 4d29c37. Identity
+  reconciled first (11a704d — Streamlit→TS SPA). Deferred minor: header.ts
+  keeps pre-existing unused animateCount/countUpFrames (defined-but-unused in
+  original main.ts too; moved verbatim).
 - 2026-11-07: **Dispatch — Picasso Task 007**
   (`agents/picasso/tasks/navbar-playcards-007.md`): navbar overhaul (integrate
   header+nav into one cohesive sticky bar; segmented view tabs; layer pills +
