@@ -10,11 +10,9 @@
 import { setWorkerUrl } from "maplibre-gl";
 import { api } from "./api/client";
 import { Drilldown } from "./components/drilldown";
-import { ExportView } from "./components/export-view";
 import { MapView } from "./components/map-view";
 import { Onboarding, shouldShowTour } from "./components/onboarding";
 import { StoryPanel } from "./components/story-panel";
-import { WhatIfView } from "./components/whatif";
 import { renderCitySummary, wireCopyLink } from "./header";
 import { computeGainsByGeoid } from "./lib/before-after";
 import { busMark, busSvg } from "./lib/mascot";
@@ -204,7 +202,7 @@ function validateBundle(b: DataBundle): void {
   if (!b.sensitivity.length) throw new Error("Sensitivity dataset is empty");
 }
 
-function mount(bundle: DataBundle): void {
+async function mount(bundle: DataBundle): Promise<void> {
   setBootLabel(BOOT_LABELS[2]!);
   const equityById = new Map<string, EquityFeature>();
   for (const f of bundle.equity.features) equityById.set(f.properties.geoid, f);
@@ -231,6 +229,13 @@ function mount(bundle: DataBundle): void {
     recommendations: bundle.recommendations.features,
     gains,
   });
+
+  // Lazy-load the What-if and Export views: they are separate tabs, not
+  // needed for first paint (keeps the initial JS bundle smaller).
+  const [{ WhatIfView }, { ExportView }] = await Promise.all([
+    import("./components/whatif"),
+    import("./components/export-view"),
+  ]);
 
   const whatIf = new WhatIfView({
     container: document.getElementById("whatif")!,
